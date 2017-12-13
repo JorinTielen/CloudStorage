@@ -16,6 +16,7 @@ import javafx.scene.control.SelectionMode;
 import javafx.scene.layout.GridPane;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.StackPane;
+import javafx.scene.layout.VBox;
 import javafx.stage.Stage;
 
 import java.util.ArrayList;
@@ -31,30 +32,41 @@ public class CloudStorageFX extends Application {
         Group root = new Group();
 
         GridPane pane = new GridPane();
-        pane.setMinSize(600, 400);
+        pane.setMinSize(350, 400);
         pane.setPadding(new Insets(10, 10, 10, 10));
         pane.setVgap(5);
         pane.setHgap(5);
-        pane.setAlignment(Pos.CENTER);
+        pane.setAlignment(Pos.CENTER_LEFT);
         root.getChildren().add(pane);
 
+        VBox fileSelection = new VBox();
+        fileSelection.setSpacing(10);
+        pane.add(fileSelection, 1, 0);
+
+        HBox buttons = new HBox();
+        buttons.setSpacing(10);
+        fileSelection.getChildren().add(buttons);
+
+        Button btnBack = new Button("<-");
+        buttons.getChildren().add(btnBack);
+
         Button btnUpload = new Button("Upload File");
-        pane.add(btnUpload,0, 0);
+        buttons.getChildren().add(btnUpload);
+
+        Button btnDownload = new Button("Download File");
+        buttons.getChildren().add(btnDownload);
+
+        Button btnCreateFolder = new Button("Create Folder");
+        buttons.getChildren().add(btnCreateFolder);
 
         final ListView<String> files = new ListView<>();
         files.getItems().addAll(createFileList());
         files.setPrefSize(300, 350);
         files.getSelectionModel().setSelectionMode(SelectionMode.MULTIPLE);
         files.getSelectionModel().selectedItemProperty().addListener(this::fileSelected);
-
-        // Create the HBox for the Months
-        HBox fileSelection = new HBox();
-        fileSelection.setSpacing(10);
         fileSelection.getChildren().add(files);
-        pane.add(fileSelection, 1, 0);
 
-
-        Scene scene = new Scene(root, 600, 400);
+        Scene scene = new Scene(root, 350, 400);
 
         stage.setTitle("CloudStorage - GSO3");
         stage.setScene(scene);

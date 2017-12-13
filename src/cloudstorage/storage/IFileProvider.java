@@ -1,7 +1,6 @@
 package cloudstorage.storage;
 
 import cloudstorage.shared.IFile;
-
 import java.rmi.Remote;
 import java.rmi.RemoteException;
 

@@ -1,5 +1,6 @@
 package cloudstorage.client;
 
+import cloudstorage.shared.Folder;
 import javafx.application.Application;
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
@@ -23,6 +24,8 @@ import javafx.scene.text.Text;
 import javafx.stage.Stage;
 
 import java.util.ArrayList;
+import java.util.List;
+import java.util.Optional;
 
 public class CloudStorageFX extends Application {
 
@@ -32,10 +35,28 @@ public class CloudStorageFX extends Application {
 
     private Client client;
 
+    final ListView<String> files = new ListView<>();
+
+
     @Override
     public void start(Stage stage) {
         client = new Client();
 
+        showLogInUI(stage);
+    }
+
+    private void updateFileList() {
+        files.getItems().clear();
+        ArrayList<String> names = new ArrayList<>();
+
+        for (Folder f : client.getRoot().getChildren()) {
+            names.add(f.getName());
+        }
+
+        files.getItems().addAll(names);
+    }
+    
+    private void showLogInUI(Stage stage) {
         stage.setTitle("login");
 
         GridPane grid = new GridPane();
@@ -62,8 +83,10 @@ public class CloudStorageFX extends Application {
 
         Button btnLogIn = new Button("log in");
         btnLogIn.setOnAction(event -> {
-              ShowCloudStorageUI();
-              stage.close();
+            if (client.login(userTextField.getText(), pwBox.getText())) {
+                showCloudStorageUI();
+                stage.close();
+            }
         });
         grid.add(btnLogIn, 1, 3);
 
@@ -73,20 +96,7 @@ public class CloudStorageFX extends Application {
         stage.show();
     }
 
-    private ArrayList<String> createFileList() {
-        ArrayList<String> items = new ArrayList<>();
-
-        items.add("1");
-        items.add("2");
-
-        return items;
-    }
-
-    private void fileSelected(ObservableValue<? extends String> observable,String oldValue,String newValue) {
-
-    }
-
-    private void ShowCloudStorageUI() {
+    private void showCloudStorageUI() {
         Stage stage = new Stage();
         Group root = new Group();
 
@@ -109,20 +119,29 @@ public class CloudStorageFX extends Application {
         Button btnBack = new Button("<-");
         buttons.getChildren().add(btnBack);
 
-        Button btnUpload = new Button("Upload File");
-        buttons.getChildren().add(btnUpload);
+        Button btnNewFile = new Button("New File");
+        buttons.getChildren().add(btnNewFile);
 
-        Button btnDownload = new Button("Download File");
-        buttons.getChildren().add(btnDownload);
+        Button btnDownloadFile = new Button("Download File");
+        buttons.getChildren().add(btnDownloadFile);
 
         Button btnCreateFolder = new Button("Create Folder");
+        btnCreateFolder.setOnAction(event -> {
+            TextInputDialog dialog = new TextInputDialog("new folder");
+            dialog.setTitle("Folder Name");
+            dialog.setHeaderText("Folder Name");
+            dialog.setContentText("Please enter a name for the folder:");
+            Optional<String> result = dialog.showAndWait();
+
+            result.ifPresent(name -> client.createFolder(name));
+            updateFileList();
+        });
         buttons.getChildren().add(btnCreateFolder);
 
-        final ListView<String> files = new ListView<>();
-        files.getItems().addAll(createFileList());
+        //Files ListView
+        updateFileList();
         files.setPrefSize(300, 350);
-        files.getSelectionModel().setSelectionMode(SelectionMode.MULTIPLE);
-        files.getSelectionModel().selectedItemProperty().addListener(this::fileSelected);
+        files.getSelectionModel().setSelectionMode(SelectionMode.SINGLE);
         fileSelection.getChildren().add(files);
 
         Scene scene = new Scene(root, 350, 400);

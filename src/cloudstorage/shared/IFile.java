@@ -1,10 +1,10 @@
 package cloudstorage.shared;
 
-import java.rmi.Remote;
+import java.io.Serializable;
 import java.rmi.RemoteException;
 import java.util.Date;
 
-public interface IFile extends Remote {
+public interface IFile extends Serializable {
     /**
      * Renames this file;
      * @param name the new name.

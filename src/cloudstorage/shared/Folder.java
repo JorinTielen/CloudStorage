@@ -1,8 +1,11 @@
 package cloudstorage.shared;
 
+import java.io.Serializable;
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
-public class Folder {
+public class Folder implements Serializable {
     private int id;
     private String name;
 
@@ -12,11 +15,41 @@ public class Folder {
     public Folder(int id, String name) {
         this.id = id;
         this.name = name;
+
+        this.children = new ArrayList<>();
     }
 
     public Folder(int id, String name, Folder parent) {
         this(id, name);
 
         this.parent = parent;
+    }
+
+    public int getId() {
+        return id;
+    }
+
+    public String getName() {
+        return name;
+    }
+
+    public Folder getParent() {
+        return parent;
+    }
+
+    public List<Folder> getChildren() {
+        return Collections.unmodifiableList(children);
+    }
+
+    public boolean addFolder(String name) {
+        for (Folder f : children) {
+            if (f.getName().equals(name)) {
+                return false;
+            }
+        }
+
+        Folder f = new Folder(1, name , this);
+        children.add(f);
+        return true;
     }
 }

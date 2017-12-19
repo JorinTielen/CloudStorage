@@ -11,7 +11,7 @@ public class Storage extends UnicastRemoteObject implements IStorage, IFileProvi
 
     private Account owner = new Account(1, "you", "you@you.com");
 
-    Storage() throws RemoteException {
+    public Storage() throws RemoteException {
 
     }
 

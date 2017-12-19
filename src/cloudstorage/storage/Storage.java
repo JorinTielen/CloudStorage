@@ -31,7 +31,7 @@ public class Storage extends UnicastRemoteObject implements IStorage, IFileProvi
     }
 
     @Override
-    public boolean upload(IFile file, Folder location) throws RemoteException {
+    public boolean upload(File file, Folder location) throws RemoteException {
         throw new UnsupportedOperationException();
     }
 
@@ -41,12 +41,12 @@ public class Storage extends UnicastRemoteObject implements IStorage, IFileProvi
     }
 
     @Override
-    public boolean LockFile(IFile file, int accountId) {
+    public boolean LockFile(File file, int accountId) {
         throw new UnsupportedOperationException();
     }
 
     @Override
-    public boolean SaveFile(IFile file, int accountId) {
+    public boolean SaveFile(File file, int accountId) {
         throw new UnsupportedOperationException();
     }
 }

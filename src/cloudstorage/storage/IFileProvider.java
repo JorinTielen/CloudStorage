@@ -1,6 +1,7 @@
 package cloudstorage.storage;
 
-import cloudstorage.shared.IFile;
+import cloudstorage.shared.File;
+
 import java.rmi.Remote;
 import java.rmi.RemoteException;
 
@@ -11,7 +12,7 @@ public interface IFileProvider extends Remote {
      * @return the file.
      * @throws RemoteException when RMI fails.
      */
-    IFile download(int id) throws RemoteException;
+    File download(int id) throws RemoteException;
 
     /**
      * Locks a file so you can edit it.
@@ -20,7 +21,7 @@ public interface IFileProvider extends Remote {
      * @return success status.
      * @throws RemoteException when RMI fails.
      */
-    boolean LockFile(IFile file, int accountId) throws RemoteException;
+    boolean LockFile(File file, int accountId) throws RemoteException;
 
     /**
      * Saves a file, if you have the lock on it.
@@ -29,5 +30,5 @@ public interface IFileProvider extends Remote {
      * @return success status.
      * @throws RemoteException when RMI fails.
      */
-    boolean SaveFile(IFile file, int accountId) throws RemoteException;
+    boolean SaveFile(File file, int accountId) throws RemoteException;
 }

@@ -32,7 +32,7 @@ public interface IStorage extends Remote {
      * @return success status.
      * @throws RemoteException when RMI fails.
      */
-    boolean upload(IFile file, Folder location) throws RemoteException;
+    boolean upload(File file, Folder location) throws RemoteException;
 
     /**
      * Downloads a file from the storage.
@@ -40,5 +40,5 @@ public interface IStorage extends Remote {
      * @return the File.
      * @throws RemoteException when RMI fails.
      */
-    IFile download(int fileId) throws RemoteException;
+    File download(int fileId) throws RemoteException;
 }

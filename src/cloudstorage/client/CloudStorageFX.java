@@ -1,22 +1,15 @@
 package cloudstorage.client;
 
 import cloudstorage.shared.Folder;
+import cloudstorage.shared.IViewable;
 import javafx.application.Application;
-import javafx.beans.value.ChangeListener;
-import javafx.beans.value.ObservableValue;
-import javafx.collections.ObservableList;
-import javafx.event.ActionEvent;
-import javafx.event.EventHandler;
-import javafx.event.EventType;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.Group;
-import javafx.scene.Node;
 import javafx.scene.Scene;
 import javafx.scene.control.*;
 import javafx.scene.layout.GridPane;
 import javafx.scene.layout.HBox;
-import javafx.scene.layout.StackPane;
 import javafx.scene.layout.VBox;
 import javafx.scene.text.Font;
 import javafx.scene.text.FontWeight;
@@ -35,7 +28,7 @@ public class CloudStorageFX extends Application {
 
     private Client client;
 
-    final ListView<String> files = new ListView<>();
+    private final ListView<IViewable> files = new ListView<>();
 
 
     @Override
@@ -46,14 +39,14 @@ public class CloudStorageFX extends Application {
     }
 
     private void updateFileList() {
+        List<IViewable> viewable = new ArrayList<>();
+        viewable.addAll(client.getRoot().getChildren());
+        viewable.addAll(client.getRoot().getFiles());
+
         files.getItems().clear();
-        ArrayList<String> names = new ArrayList<>();
-
-        for (Folder f : client.getRoot().getChildren()) {
-            names.add(f.getName());
+        for (IViewable view : viewable) {
+            files.getItems().add(view);
         }
-
-        files.getItems().addAll(names);
     }
     
     private void showLogInUI(Stage stage) {

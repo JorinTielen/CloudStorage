@@ -1,8 +1,9 @@
 package cloudstorage.shared;
 
+import java.io.Serializable;
 import java.util.Date;
 
-public class File implements IFile {
+public class File implements IViewable, Serializable {
     private int id;
     private String name;
     private int size;
@@ -37,37 +38,40 @@ public class File implements IFile {
     }
 
     @Override
+    public String getName() {
+        return name;
+    }
+
     public void rename(String name) {
 
     }
 
-    @Override
     public void editContent() {
 
     }
 
-    @Override
     public Integer getId() {
         return null;
     }
 
-    @Override
     public Account getOwner() {
         return null;
     }
 
-    @Override
     public Date getCreatedAt() {
         return null;
     }
 
-    @Override
     public Date getEditedAt() {
         return null;
     }
 
-    @Override
     public Folder getLocation() {
         return null;
+    }
+
+    @Override
+    public String toString() {
+        return name;
     }
 }

@@ -20,8 +20,10 @@ public class Client {
     private Integer session;
     private LocalStorage localStorage;
 
-    public Client() {
-        connectToCloudStorage("145.93.165.154");
+    private Folder currentFolder;
+
+    Client() {
+        connectToCloudStorage("145.93.165.94");
     }
 
     public boolean login(String username, String password) {
@@ -31,6 +33,7 @@ public class Client {
                 if (remoteStorage != null) {
                     LOGGER.info("Client: Login successful");
                     localStorage = new LocalStorage(remoteStorage);
+                    currentFolder = localStorage.getRoot();
                     return true;
                 } else {
                     LOGGER.info("Client: Login failed");
@@ -49,8 +52,16 @@ public class Client {
         return localStorage.getRoot();
     }
 
+    public Folder getCurrentFolder() {
+        return currentFolder;
+    }
+
+    public void selectFolder(Folder folder) {
+        currentFolder = folder;
+    }
+
     public boolean createFolder(String name) {
-        return localStorage.createFolder(name);
+        return localStorage.createFolder(name, currentFolder);
     }
 
     private void connectToCloudStorage(String ip) {

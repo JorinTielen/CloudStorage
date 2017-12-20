@@ -56,7 +56,7 @@ public class Folder implements IViewable, Serializable {
             }
         }
 
-        Folder f = new Folder(1, name , this);
+        Folder f = new Folder(1, name, this);
         children.add(f);
         return true;
     }

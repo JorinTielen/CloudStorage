@@ -3,11 +3,14 @@ package cloudstorage.client;
 import cloudstorage.shared.Folder;
 import cloudstorage.shared.IViewable;
 import javafx.application.Application;
+import javafx.event.EventHandler;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.Group;
 import javafx.scene.Scene;
 import javafx.scene.control.*;
+import javafx.scene.input.MouseButton;
+import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.GridPane;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
@@ -39,9 +42,10 @@ public class CloudStorageFX extends Application {
     }
 
     private void updateFileList() {
+        Folder openFolder = client.getCurrentFolder();
         List<IViewable> viewable = new ArrayList<>();
-        viewable.addAll(client.getRoot().getChildren());
-        viewable.addAll(client.getRoot().getFiles());
+        viewable.addAll(openFolder.getChildren());
+        viewable.addAll(openFolder.getFiles());
 
         files.getItems().clear();
         for (IViewable view : viewable) {
@@ -110,6 +114,12 @@ public class CloudStorageFX extends Application {
         fileSelection.getChildren().add(buttons);
 
         Button btnBack = new Button("<-");
+        btnBack.setOnAction(event -> {
+            if (client.getCurrentFolder() != client.getRoot()) {
+                client.selectFolder(client.getCurrentFolder().getParent());
+                updateFileList();
+            }
+        });
         buttons.getChildren().add(btnBack);
 
         Button btnNewFile = new Button("New File");
@@ -135,6 +145,17 @@ public class CloudStorageFX extends Application {
         updateFileList();
         files.setPrefSize(300, 350);
         files.getSelectionModel().setSelectionMode(SelectionMode.SINGLE);
+        files.setOnMouseClicked(event -> {
+            if(event.getButton().equals(MouseButton.PRIMARY)){
+                if(event.getClickCount() == 2){
+                    IViewable selectedItem = files.getSelectionModel().getSelectedItem();
+                    if (selectedItem instanceof Folder) {
+                        client.selectFolder((Folder) selectedItem);
+                    }
+                    updateFileList();
+                }
+            }
+        });
         fileSelection.getChildren().add(files);
 
         Scene scene = new Scene(root, 350, 400);

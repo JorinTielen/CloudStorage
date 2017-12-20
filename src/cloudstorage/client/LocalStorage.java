@@ -31,4 +31,8 @@ public class LocalStorage {
     public boolean createFolder(String name) {
         return root.addFolder(name);
     }
+
+    public boolean createFolder(String name, Folder parent) {
+        return parent.addFolder(name);
+    }
 }

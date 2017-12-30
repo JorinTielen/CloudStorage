@@ -12,4 +12,12 @@ public class Account implements Serializable {
         this.name = name;
         this.email = email;
     }
+
+    public int getId() {
+        return id;
+    }
+
+    public String getName() {
+        return name;
+    }
 }

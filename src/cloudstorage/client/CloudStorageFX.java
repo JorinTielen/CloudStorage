@@ -3,14 +3,14 @@ package cloudstorage.client;
 import cloudstorage.shared.Folder;
 import cloudstorage.shared.IViewable;
 import javafx.application.Application;
-import javafx.event.EventHandler;
+import javafx.application.Platform;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.Group;
+import javafx.scene.Node;
 import javafx.scene.Scene;
 import javafx.scene.control.*;
 import javafx.scene.input.MouseButton;
-import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.GridPane;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
@@ -18,6 +18,7 @@ import javafx.scene.text.Font;
 import javafx.scene.text.FontWeight;
 import javafx.scene.text.Text;
 import javafx.stage.Stage;
+import javafx.util.Pair;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -83,9 +84,24 @@ public class CloudStorageFX extends Application {
             if (client.login(userTextField.getText(), pwBox.getText())) {
                 showCloudStorageUI();
                 stage.close();
+            } else {
+                Alert alert = new Alert(Alert.AlertType.ERROR);
+                alert.setTitle("Error logging in");
+                alert.setHeaderText("Invalid login");
+                alert.setContentText("incorrect username/password");
+
+                alert.showAndWait();
             }
         });
+        btnLogIn.setDefaultButton(true);
         grid.add(btnLogIn, 1, 3);
+
+        Button btnRegister = new Button("register");
+        btnRegister.setOnAction(event -> {
+            showRegisterUI();
+            stage.close();
+        });
+        grid.add(btnRegister, 1, 4);
 
 
         Scene scene = new Scene(grid, 300, 275);
@@ -123,6 +139,16 @@ public class CloudStorageFX extends Application {
         buttons.getChildren().add(btnBack);
 
         Button btnNewFile = new Button("New File");
+        btnNewFile.setOnAction(event -> {
+            TextInputDialog dialog = new TextInputDialog("new file");
+            dialog.setTitle("File Name");
+            dialog.setHeaderText("File Name");
+            dialog.setContentText("Please enter a name for the file:");
+            Optional<String> result = dialog.showAndWait();
+
+            result.ifPresent(name -> client.createFile(name));
+            updateFileList();
+        });
         buttons.getChildren().add(btnNewFile);
 
         Button btnDownloadFile = new Button("Download File");
@@ -161,6 +187,58 @@ public class CloudStorageFX extends Application {
         Scene scene = new Scene(root, 350, 400);
 
         stage.setTitle("CloudStorage - GSO3");
+        stage.setScene(scene);
+        stage.show();
+    }
+
+    private void showRegisterUI() {
+        Stage stage = new Stage();
+        Group root = new Group();
+
+        GridPane grid = new GridPane();
+        grid.setAlignment(Pos.CENTER);
+        grid.setHgap(10);
+        grid.setVgap(10);
+        grid.setPadding(new Insets(25, 25, 25, 25));
+        root.getChildren().add(grid);
+
+        Text sceneTitle = new Text("Welcome to CloudStorage");
+        sceneTitle.setFont(Font.font("Tahoma", FontWeight.NORMAL, 20));
+        grid.add(sceneTitle, 0, 0, 2, 1);
+
+        Label lblUsername = new Label("User Name:");
+        grid.add(lblUsername, 0, 1);
+
+        TextField txtUsername = new TextField();
+        grid.add(txtUsername, 1, 1);
+
+        Label lblPassword = new Label("Password:");
+        grid.add(lblPassword, 0, 2);
+
+        PasswordField pfPassword = new PasswordField();
+        grid.add(pfPassword, 1, 2);
+
+        Label lblEmail = new Label("Email:");
+        grid.add(lblEmail, 0, 3);
+
+        TextField txtEmail = new TextField();
+        grid.add(txtEmail, 1, 3);
+
+        Button btnRegister = new Button("register");
+        btnRegister.setOnAction(event -> {
+            String username = txtUsername.getText();
+            String password = pfPassword.getText();
+            String email = txtEmail.getText();
+            if (username.length() >= 4 && password.length() >= 6 && email.length() >= 6) {
+                client.register(username, password, email);
+            }
+        });
+        btnRegister.setDefaultButton(true);
+        grid.add(btnRegister, 1, 4);
+
+        Scene scene = new Scene(root, 300, 275);
+
+        stage.setTitle("register");
         stage.setScene(scene);
         stage.show();
     }

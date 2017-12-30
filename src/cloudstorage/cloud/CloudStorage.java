@@ -22,17 +22,30 @@ public class CloudStorage extends UnicastRemoteObject implements ICloudStorage {
 
     public CloudStorage() throws RemoteException {
         startCloudStorage();
+
+        storages.add(new Storage(this));
     }
 
     public IStorage login(String username, String password) {
         if (username.equals("test") && password.equals("test")) {
             try {
-                return new Storage();
+                for (Storage s : storages) {
+                    if (s.getOwner().getName().equals(username)) {
+                        return s;
+                    }
+                }
+                return null;
             } catch (RemoteException e) {
                 e.printStackTrace();
             }
         }
         return null;
+    }
+
+    @Override
+    public boolean registerStorage(Storage storage) throws RemoteException {
+        storages.add(storage);
+        return true;
     }
 
     public IStorage register(String username, String email, String password) {

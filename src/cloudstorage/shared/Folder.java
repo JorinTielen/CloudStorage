@@ -8,13 +8,14 @@ import java.util.List;
 public class Folder implements IViewable, Serializable {
     private int id;
     private String name;
+    private Account owner;
 
     private Folder parent;
     private List<Folder> children;
 
     private List<File> files;
 
-    public Folder(int id, String name) {
+    public Folder(int id, String name, Account owner) {
         this.id = id;
         this.name = name;
 
@@ -22,8 +23,8 @@ public class Folder implements IViewable, Serializable {
         this.files = new ArrayList<>();
     }
 
-    public Folder(int id, String name, Folder parent) {
-        this(id, name);
+    public Folder(int id, String name, Account owner, Folder parent) {
+        this(id, name, owner);
 
         this.parent = parent;
     }
@@ -56,8 +57,20 @@ public class Folder implements IViewable, Serializable {
             }
         }
 
-        Folder f = new Folder(1, name, this);
+        Folder f = new Folder(1, name, owner, this);
         children.add(f);
+        return true;
+    }
+
+    public boolean addFile(String name) {
+        for (File f : files) {
+            if (f.getName().equals(name)) {
+                return false;
+            }
+        }
+
+        File f = new File(name, 1, owner);
+        files.add(f);
         return true;
     }
 

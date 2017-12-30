@@ -18,23 +18,22 @@ public class CloudStorage extends UnicastRemoteObject implements ICloudStorage {
 
     private static final String BINDINGNAME = "CloudStorage";
 
+    private CSRepository repository;
+
     private List<Storage> storages = new ArrayList<>();
 
     public CloudStorage() throws RemoteException {
         startCloudStorage();
 
+        repository = new CSRepository(new CSRepositorySQLContext());
+
         storages.add(new Storage(this));
     }
 
     public IStorage login(String username, String password) {
-        if (username.equals("test") && password.equals("test")) {
+        if (repository.login(username, password)) {
             try {
-                for (Storage s : storages) {
-                    if (s.getOwner().getName().equals(username)) {
-                        return s;
-                    }
-                }
-                return null;
+                return new Storage(this);
             } catch (RemoteException e) {
                 e.printStackTrace();
             }
@@ -49,7 +48,14 @@ public class CloudStorage extends UnicastRemoteObject implements ICloudStorage {
     }
 
     public IStorage register(String username, String email, String password) {
-        throw new UnsupportedOperationException();
+        if (repository.register(username, password, email)) {
+            try {
+                return new Storage(this);
+            } catch (RemoteException e) {
+                e.printStackTrace();
+            }
+        }
+        return null;
     }
 
     public void logout(int session) {

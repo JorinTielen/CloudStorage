@@ -13,19 +13,16 @@ public class LocalStorage extends UnicastRemoteObject implements IRemoteProperty
     private static final Logger LOGGER = Logger.getLogger(LocalStorage.class.getName());
 
     private IStorage remoteStorage;
-
-
     private Folder root;
-    private Folder files;
-    private Folder shared;
+
     private Account owner;
 
     LocalStorage(IStorage remoteStorage) throws RemoteException {
         this.remoteStorage = remoteStorage;
         subscribeToRemote();
-        this.owner = remoteStorage.getOwner();
 
-        root = remoteStorage.getRoot();
+        this.owner = remoteStorage.getOwner();
+        this.root = remoteStorage.getRoot();
     }
 
     @Override
@@ -47,16 +44,6 @@ public class LocalStorage extends UnicastRemoteObject implements IRemoteProperty
         }
     }
 
-    public Folder getFolder(int id, String name) {
-        if (name.equals("root")) return root;
-        for (Folder f : root.getChildren()) {
-            if (f.getName().equals(name) && f.getId() == id) {
-                return f;
-            }
-        }
-        return null;
-    }
-
     public boolean createFile(String name, Folder parent) {
         try {
             return remoteStorage.createFile(name, parent);
@@ -69,7 +56,7 @@ public class LocalStorage extends UnicastRemoteObject implements IRemoteProperty
 
     private void subscribeToRemote() {
         try {
-            remoteStorage.subscribe(this, "Files");
+            remoteStorage.subscribe(this, "root");
         } catch (RemoteException e) {
             LOGGER.severe("LocalStorage: RemoteException when trying to subscribe to remote");
             LOGGER.severe("LocalStorage: RemoteException: " + e.getMessage());

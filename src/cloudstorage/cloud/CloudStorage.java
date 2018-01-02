@@ -1,5 +1,8 @@
 package cloudstorage.cloud;
 
+import cloudstorage.cloud.repository.CSRepository;
+import cloudstorage.cloud.repository.CSRepositorySQLContext;
+import cloudstorage.shared.Account;
 import cloudstorage.shared.ICloudStorage;
 import cloudstorage.shared.IStorage;
 import cloudstorage.storage.Storage;
@@ -26,16 +29,16 @@ public class CloudStorage extends UnicastRemoteObject implements ICloudStorage {
         startCloudStorage();
 
         repository = new CSRepository(new CSRepositorySQLContext());
-
-        storages.add(new Storage(this));
     }
 
     public IStorage login(String username, String password) {
         if (repository.login(username, password)) {
             try {
-                return new Storage(this);
+                Account a = repository.getAccount(username);
+                return new Storage(this, repository.getStorageId(a.getId()));
             } catch (RemoteException e) {
-                e.printStackTrace();
+                LOGGER.severe("CloudStorage: Cannot login");
+                LOGGER.severe("CloudStorage: RemoteException: " + e.getMessage());
             }
         }
         return null;
@@ -50,9 +53,11 @@ public class CloudStorage extends UnicastRemoteObject implements ICloudStorage {
     public IStorage register(String username, String email, String password) {
         if (repository.register(username, password, email)) {
             try {
-                return new Storage(this);
+                Account a = repository.getAccount(username);
+                return new Storage(this, repository.getStorageId(a.getId()));
             } catch (RemoteException e) {
-                e.printStackTrace();
+                LOGGER.severe("CloudStorage: Cannot register");
+                LOGGER.severe("CloudStorage: RemoteException: " + e.getMessage());
             }
         }
         return null;

@@ -1,9 +1,11 @@
-package cloudstorage.cloud;
+package cloudstorage.cloud.repository;
+
+import cloudstorage.shared.Account;
 
 public class CSRepository {
     private ICSRepositoryContext context;
 
-    CSRepository(ICSRepositoryContext context) {
+    public CSRepository(ICSRepositoryContext context) {
         this.context = context;
     }
 
@@ -13,5 +15,13 @@ public class CSRepository {
 
     public boolean register(String username, String password, String email) {
         return this.context.register(username, password, email);
+    }
+
+    public int getStorageId(int owner_id) {
+        return this.context.getStorageId(owner_id);
+    }
+
+    public Account getAccount(String username) {
+        return this.context.getAccount(username);
     }
 }

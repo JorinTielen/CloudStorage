@@ -1,60 +1,68 @@
-package cloudstorage.cloud;
+package cloudstorage.cloud.repository;
 
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
-import java.io.IOException;
-import java.io.InputStream;
+import cloudstorage.database.SQLConnector;
+import cloudstorage.shared.Account;
+
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
-import java.sql.*;
-import java.util.Properties;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.sql.Statement;
 import java.util.logging.Logger;
 
 public class CSRepositorySQLContext implements ICSRepositoryContext {
     private static final Logger LOGGER = Logger.getLogger(CSRepositorySQLContext.class.getName());
 
-    private Connection conn;
+    private SQLConnector connector = new SQLConnector();
 
-    private void openConnection() {
-        Properties prop = new Properties();
-        InputStream input;
+    public Account getAccount(String username) {
+        String SQL = "SELECT id, username, email FROM accounts WHERE username = ?";
 
-        try {
-            input = new FileInputStream("database.properties");
-            prop.load(input);
+        Account a = null;
 
-            String url = prop.getProperty("url");
-            String username = prop.getProperty("username");
-            String password = prop.getProperty("password");
-
-            Class.forName("org.postgresql.Driver");
-            conn = DriverManager.getConnection(url, username, password);
-            LOGGER.info("Connected to database");
-        } catch (ClassNotFoundException e) {
-            LOGGER.severe("SQLContext: ClassNotFoundException when trying to connect");
-            LOGGER.severe("SQLContext: ClassNotFoundException: " + e.getMessage());
-        } catch (FileNotFoundException e) {
-            LOGGER.severe("SQLContext: FileNotFoundException when trying to connect");
-            LOGGER.severe("SQLContext: FileNotFoundException: " + e.getMessage());
-        } catch (IOException e) {
-            LOGGER.severe("SQLContext: IOException when trying to connect");
-            LOGGER.severe("SQLContext: IOException: " + e.getMessage());
+        connector.openConnection();
+        try (PreparedStatement pStmt = connector.con.prepareStatement(SQL)) {
+            pStmt.setString(1, username);
+            try (ResultSet results = pStmt.executeQuery()) {
+                while (results.next()) {
+                    a = new Account(
+                            results.getInt("id"),
+                            username,
+                            results.getString("email"));
+                }
+            }
         } catch (SQLException e) {
             LOGGER.severe("SQLContext: SQLException when trying to connect");
             LOGGER.severe("SQLContext: SQLException: " + e.getMessage());
+        } finally {
+            connector.closeConnection();
         }
+
+        return a;
     }
 
-    private void closeConnection() {
-        try {
-            if (conn != null) {
-                conn.close();
+    public int getStorageId(int owner_id) {
+        String SQL = "SELECT id FROM storages WHERE account_id = ?";
+
+        int id = -1;
+
+        connector.openConnection();
+        try (PreparedStatement pStmt = connector.con.prepareStatement(SQL)) {
+            pStmt.setInt(1, owner_id);
+            try (ResultSet results = pStmt.executeQuery()) {
+                while (results.next()) {
+                    return results.getInt("id");
+                }
             }
-        } catch (SQLException ex) {
-            LOGGER.info(ex.getMessage());
+        } catch (SQLException e) {
+            LOGGER.severe("SQLContext: SQLException when trying to connect");
+            LOGGER.severe("SQLContext: SQLException: " + e.getMessage());
         } finally {
-            conn = null;
+            connector.closeConnection();
         }
+
+        return id;
     }
 
     public boolean login(String username, String password) {
@@ -63,18 +71,19 @@ public class CSRepositorySQLContext implements ICSRepositoryContext {
         String hashedPassword = hashPassword(password);
         String correctPassword = "";
 
-        openConnection();
-        try (PreparedStatement pStmt = conn.prepareStatement(SQL)) {
+        connector.openConnection();
+        try (PreparedStatement pStmt = connector.con.prepareStatement(SQL)) {
             pStmt.setString(1, username);
             try (ResultSet results = pStmt.executeQuery()) {
                 while (results.next()) {
                     correctPassword = results.getString("password_hash");
                 }
             }
-        } catch (SQLException ex) {
-            LOGGER.info(ex.getMessage());
+        } catch (SQLException e) {
+            LOGGER.severe("SQLContext: SQLException when trying to connect");
+            LOGGER.severe("SQLContext: SQLException: " + e.getMessage());
         } finally {
-            closeConnection();
+            connector.closeConnection();
         }
 
         return hashedPassword != null && hashedPassword.equals(correctPassword);
@@ -86,8 +95,8 @@ public class CSRepositorySQLContext implements ICSRepositoryContext {
         String hashedPassword = hashPassword(password);
         int affectedRows = 0;
 
-        openConnection();
-        try (PreparedStatement pStmt = conn.prepareStatement(SQL, Statement.RETURN_GENERATED_KEYS)) {
+        connector.openConnection();
+        try (PreparedStatement pStmt = connector.con.prepareStatement(SQL, Statement.RETURN_GENERATED_KEYS)) {
             pStmt.setString(1, username);
             pStmt.setString(2, hashedPassword);
             pStmt.setString(3, email);
@@ -97,7 +106,7 @@ public class CSRepositorySQLContext implements ICSRepositoryContext {
         } catch (SQLException ex) {
             LOGGER.info(ex.getMessage());
         } finally {
-            closeConnection();
+            connector.closeConnection();
         }
 
         return affectedRows > 0;
@@ -110,7 +119,6 @@ public class CSRepositorySQLContext implements ICSRepositoryContext {
 
         try {
             md = MessageDigest.getInstance("MD5");
-
         } catch (NoSuchAlgorithmException e) {
             LOGGER.severe("SQLContext: NoSuchAlgorithmException when trying to hash password");
             LOGGER.severe("SQLContext: NoSuchAlgorithmException: " + e.getMessage());

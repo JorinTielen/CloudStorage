@@ -1,10 +1,10 @@
 package cloudstorage.storage;
 
-import cloudstorage.client.LocalStorage;
 import cloudstorage.cloud.CloudStorage;
 import cloudstorage.shared.*;
+import cloudstorage.storage.repository.SRepository;
+import cloudstorage.storage.repository.SRepositorySQLContext;
 import fontyspublisher.IRemotePropertyListener;
-import fontyspublisher.Publisher;
 import fontyspublisher.RemotePublisher;
 
 import java.rmi.RemoteException;
@@ -14,21 +14,28 @@ import java.util.logging.Logger;
 public class Storage extends UnicastRemoteObject implements IStorage, IFileProvider {
     private static final Logger LOGGER = Logger.getLogger(Storage.class.getName());
 
+    private int id;
+
     private ICloudStorage cloudStorage;
     private RemotePublisher publisher;
 
+    private SRepository repository;
+
     private Account owner = new Account(1, "test", "you@you.com");
 
-    private Folder root = new Folder (2, "root", owner);
-    private Folder files = new Folder(3, "Your Storage", owner);
-    private Folder shared = new Folder(4, "Shared with You", owner);
+    private Folder root;
+    private Folder files;
+    private Folder shared;
 
-    public Storage(CloudStorage cloudStorage) throws RemoteException {
+    public Storage(CloudStorage cloudStorage, int id) throws RemoteException {
         this.cloudStorage = cloudStorage;
+
+        this.repository = new SRepository(new SRepositorySQLContext());
+        loadFromDB();
 
         try {
             publisher = new RemotePublisher();
-            publisher.registerProperty("Files");
+            publisher.registerProperty("root");
         } catch (RemoteException e) {
             LOGGER.severe("Storage: Cannot create publisher");
             LOGGER.severe("Storage: RemoteException " + e.getMessage());
@@ -36,6 +43,12 @@ public class Storage extends UnicastRemoteObject implements IStorage, IFileProvi
         }
 
         cloudStorage.registerStorage(this);
+    }
+
+    private void loadFromDB() {
+        this.root = repository.getRoot(owner);
+        this.files = root.getFolder("Your Storage");
+        this.shared = root.getFolder("Shared with You");
     }
 
     @Override
@@ -62,10 +75,10 @@ public class Storage extends UnicastRemoteObject implements IStorage, IFileProvi
     public boolean createFolder(String name, Folder parent) {
         boolean success = parent.addFolder(name);
         try {
-            publisher.inform("Files", null, root);
+            publisher.inform("root", null, root);
         } catch (RemoteException e) {
             LOGGER.severe("Storage: Cannot create folder");
-            LOGGER.severe("Storage: RemoteException " + e.getMessage());
+            LOGGER.severe("Storage: RemoteException: " + e.getMessage());
         }
         return success;
     }
@@ -74,10 +87,10 @@ public class Storage extends UnicastRemoteObject implements IStorage, IFileProvi
     public boolean createFile(String name, Folder parent) {
         boolean success = parent.addFile(name);
         try {
-            publisher.inform("Files", null, root);
+            publisher.inform("root", null, root);
         } catch (RemoteException e) {
             LOGGER.severe("Storage: Cannot create folder");
-            LOGGER.severe("Storage: RemoteException " + e.getMessage());
+            LOGGER.severe("Storage: RemoteException: " + e.getMessage());
         }
         return success;
     }

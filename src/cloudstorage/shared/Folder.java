@@ -29,6 +29,16 @@ public class Folder implements IViewable, Serializable {
         this.parent = parent;
     }
 
+    public Folder getFolder(String name) {
+        for (Folder f : children) {
+            if (f.name.equals(name)) {
+                return f;
+            }
+        }
+
+        return null;
+    }
+
     public Integer getId() {
         return id;
     }
@@ -39,7 +49,7 @@ public class Folder implements IViewable, Serializable {
     }
 
     public List<File> getFiles() {
-        return Collections.unmodifiableList(files);
+        return files;
     }
 
     public Folder getParent() {
@@ -47,7 +57,7 @@ public class Folder implements IViewable, Serializable {
     }
 
     public List<Folder> getChildren() {
-        return Collections.unmodifiableList(children);
+        return children;
     }
 
     public boolean addFolder(String name) {
@@ -57,7 +67,7 @@ public class Folder implements IViewable, Serializable {
             }
         }
 
-        Folder f = new Folder(1, name, owner, this);
+        Folder f = new Folder(8, name, owner, this);
         children.add(f);
         return true;
     }

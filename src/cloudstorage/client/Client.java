@@ -75,7 +75,7 @@ public class Client {
     }
 
     public Folder getCurrentFolder() {
-        currentFolder = localStorage.getFolder(currentFolder.getId(), currentFolder.getName());
+        //currentFolder = localStorage.getFolder(currentFolder.getId(), currentFolder.getName());
         return currentFolder;
     }
 

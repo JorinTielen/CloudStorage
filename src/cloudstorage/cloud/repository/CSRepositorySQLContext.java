@@ -5,10 +5,7 @@ import cloudstorage.shared.Account;
 
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
-import java.sql.SQLException;
-import java.sql.Statement;
+import java.sql.*;
 import java.util.logging.Logger;
 
 public class CSRepositorySQLContext implements ICSRepositoryContext {
@@ -52,7 +49,7 @@ public class CSRepositorySQLContext implements ICSRepositoryContext {
             pStmt.setInt(1, owner_id);
             try (ResultSet results = pStmt.executeQuery()) {
                 while (results.next()) {
-                    return results.getInt("id");
+                    id = results.getInt("id");
                 }
             }
         } catch (SQLException e) {
@@ -96,6 +93,8 @@ public class CSRepositorySQLContext implements ICSRepositoryContext {
         int affectedRows = 0;
 
         connector.openConnection();
+
+        //First add the account
         try (PreparedStatement pStmt = connector.con.prepareStatement(SQL, Statement.RETURN_GENERATED_KEYS)) {
             pStmt.setString(1, username);
             pStmt.setString(2, hashedPassword);
@@ -103,13 +102,120 @@ public class CSRepositorySQLContext implements ICSRepositoryContext {
 
             affectedRows = pStmt.executeUpdate();
 
-        } catch (SQLException ex) {
-            LOGGER.info(ex.getMessage());
+        } catch (SQLException e) {
+            LOGGER.severe("SQLContext: SQLException when trying to register");
+            LOGGER.severe("SQLContext: SQLException: " + e.getMessage());
         } finally {
             connector.closeConnection();
         }
 
+        //Then, add the storage
+        int affectedRowsStorage = 0;
+        int account_id = -1;
+        if (affectedRows > 0) {
+            String SQL2 = "INSERT INTO storages (account_id) VALUES (?)";
+
+            account_id = getAccount(username).getId();
+
+            connector.openConnection();
+            try (PreparedStatement pStmt = connector.con.prepareStatement(SQL2, Statement.RETURN_GENERATED_KEYS)) {
+                pStmt.setInt(1, account_id);
+
+                affectedRowsStorage = pStmt.executeUpdate();
+            } catch (SQLException e) {
+                LOGGER.severe("SQLContext: SQLException when trying to register storage");
+                LOGGER.severe("SQLContext: SQLException: " + e.getMessage());
+            } finally {
+                connector.closeConnection();
+            }
+        }
+
+        //Then add the root folder
+        if (affectedRows > 0 && affectedRowsStorage > 0) {
+            String SQL2 = "INSERT INTO folders (\"name\", parent_id, owner_id) VALUES (?, ?, ?)";
+
+            connector.openConnection();
+            try (PreparedStatement pStmt = connector.con.prepareStatement(SQL2, Statement.RETURN_GENERATED_KEYS)) {
+                pStmt.setString(1, "root");
+                pStmt.setNull(2, Types.INTEGER);
+                pStmt.setInt(3, account_id);
+
+                pStmt.executeUpdate();
+            } catch (SQLException e) {
+                LOGGER.severe("SQLContext: SQLException when trying to register storage");
+                LOGGER.severe("SQLContext: SQLException: " + e.getMessage());
+            } finally {
+                connector.closeConnection();
+            }
+        }
+
+        int parent_id = getFolderId("root", account_id);
+
+        //Then add the files folder
+        if (affectedRows > 0 && affectedRowsStorage > 0) {
+            String SQL2 = "INSERT INTO folders (\"name\", parent_id, owner_id) VALUES (?, ?, ?)";
+
+
+            connector.openConnection();
+            try (PreparedStatement pStmt = connector.con.prepareStatement(SQL2, Statement.RETURN_GENERATED_KEYS)) {
+                pStmt.setString(1, "Your Storage");
+                pStmt.setInt(2, parent_id);
+                pStmt.setInt(3, account_id);
+
+                pStmt.executeUpdate();
+            } catch (SQLException e) {
+                LOGGER.severe("SQLContext: SQLException when trying to register storage");
+                LOGGER.severe("SQLContext: SQLException: " + e.getMessage());
+            } finally {
+                connector.closeConnection();
+            }
+        }
+
+        //Then add the shared folder
+        if (affectedRows > 0 && affectedRowsStorage > 0) {
+            String SQL2 = "INSERT INTO folders (\"name\", parent_id, owner_id) VALUES (?, ?, ?)";
+
+            connector.openConnection();
+            try (PreparedStatement pStmt = connector.con.prepareStatement(SQL2, Statement.RETURN_GENERATED_KEYS)) {
+                pStmt.setString(1, "Shared with You");
+                pStmt.setInt(2, parent_id);
+                pStmt.setInt(3, account_id);
+
+                pStmt.executeUpdate();
+            } catch (SQLException e) {
+                LOGGER.severe("SQLContext: SQLException when trying to register storage");
+                LOGGER.severe("SQLContext: SQLException: " + e.getMessage());
+            } finally {
+                connector.closeConnection();
+            }
+        }
+
         return affectedRows > 0;
+    }
+
+    public int getFolderId(String name, int owner_id) {
+        String SQL = "SELECT id FROM folders WHERE owner_id = ? AND \"name\" = ?";
+
+        int id = -1;
+
+        connector.openConnection();
+        try (PreparedStatement pStmt = connector.con.prepareStatement(SQL)) {
+            pStmt.setInt(1, owner_id);
+            pStmt.setString(2, name);
+
+            try (ResultSet results = pStmt.executeQuery()) {
+                while (results.next()) {
+                    id = results.getInt("id");
+                }
+            }
+        } catch (SQLException e) {
+            LOGGER.severe("SQLContext: SQLException when trying to connect");
+            LOGGER.severe("SQLContext: SQLException: " + e.getMessage());
+        } finally {
+            connector.closeConnection();
+        }
+
+        return id;
     }
 
     private String hashPassword(String password) {

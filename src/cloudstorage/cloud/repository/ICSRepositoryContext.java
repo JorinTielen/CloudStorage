@@ -11,4 +11,6 @@ public interface ICSRepositoryContext {
     int getStorageId(int owner_id);
 
     Account getAccount(String username);
+
+    Account getAccountFromStorage(int id);
 }

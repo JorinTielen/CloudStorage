@@ -39,6 +39,33 @@ public class CSRepositorySQLContext implements ICSRepositoryContext {
         return a;
     }
 
+    @Override
+    public Account getAccountFromStorage(int id) {
+        String SQL = "SELECT a.id, a.username, a.email FROM accounts a JOIN storages s ON a.id = s.account_id WHERE s.id = ?";
+
+        Account a = null;
+
+        connector.openConnection();
+        try (PreparedStatement pStmt = connector.con.prepareStatement(SQL)) {
+            pStmt.setInt(1, id);
+            try (ResultSet results = pStmt.executeQuery()) {
+                while (results.next()) {
+                    a = new Account(
+                            results.getInt("id"),
+                            results.getString("username"),
+                            results.getString("email"));
+                }
+            }
+        } catch (SQLException e) {
+            LOGGER.severe("SQLContext: SQLException when trying to connect");
+            LOGGER.severe("SQLContext: SQLException: " + e.getMessage());
+        } finally {
+            connector.closeConnection();
+        }
+
+        return a;
+    }
+
     public int getStorageId(int owner_id) {
         String SQL = "SELECT id FROM storages WHERE account_id = ?";
 

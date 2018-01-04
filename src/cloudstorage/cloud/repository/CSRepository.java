@@ -24,4 +24,8 @@ public class CSRepository {
     public Account getAccount(String username) {
         return this.context.getAccount(username);
     }
+
+    public Account getAccountFromStorage(int storage_id) {
+        return this.context.getAccountFromStorage(storage_id);
+    }
 }

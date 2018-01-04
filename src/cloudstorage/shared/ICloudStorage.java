@@ -11,4 +11,5 @@ public interface ICloudStorage extends Remote {
     IStorage login(String username, String password) throws RemoteException;
     IStorage register(String username, String email, String password) throws RemoteException;
     boolean registerStorageServer(IStorageServer server) throws RemoteException;
+    Account getAccountFromStorage(int id) throws RemoteException;
 }

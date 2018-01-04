@@ -21,7 +21,7 @@ public class Storage extends UnicastRemoteObject implements IStorage, IFileProvi
 
     private SRepository repository;
 
-    private Account owner = new Account(1, "test", "you@you.com");
+    private Account owner;
 
     private Folder root;
     private Folder files;
@@ -29,7 +29,9 @@ public class Storage extends UnicastRemoteObject implements IStorage, IFileProvi
 
     public Storage(ICloudStorage cloudStorage, int id) throws RemoteException {
         this.cloudStorage = cloudStorage;
+
         this.id = id;
+        this.owner = cloudStorage.getAccountFromStorage(this.id);
 
         this.repository = new SRepository(new SRepositorySQLContext());
         loadFromDB();

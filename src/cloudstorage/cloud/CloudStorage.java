@@ -67,6 +67,11 @@ public class CloudStorage extends UnicastRemoteObject implements ICloudStorage {
         return true;
     }
 
+    @Override
+    public Account getAccountFromStorage(int storage_id) {
+        return repository.getAccountFromStorage(storage_id);
+    }
+
     public IStorage register(String username, String email, String password) {
         if (repository.register(username, password, email)) {
             try {

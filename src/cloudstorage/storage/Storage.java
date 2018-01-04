@@ -73,6 +73,12 @@ public class Storage extends UnicastRemoteObject implements IStorage, IFileProvi
 
     @Override
     public boolean createFolder(String name, Folder parent) {
+        for (Folder f : parent.getChildren()) {
+            if (f.getName().equals(name)) {
+                return createFolder(name + " (1)", parent);
+            }
+        }
+
         boolean success = repository.addFolder(owner, name, parent);
         loadFromDB();
         try {

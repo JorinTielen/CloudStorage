@@ -73,6 +73,16 @@ public class Storage extends UnicastRemoteObject implements IStorage, IFileProvi
 
     @Override
     public boolean createFolder(String name, Folder parent) {
+        //You are not allowed to name the folder these names
+        if ("Your Storage".equals(name) || "Shared with You".equals(name) || "root".equals(name)) {
+            return false;
+        }
+
+        //You are not allowed to make folders in the root or shared folder.
+        if (parent.getName().equals("root") || parent.getName().equals("Shared with You")) {
+            return false;
+        }
+
         for (Folder f : parent.getChildren()) {
             if (f.getName().equals(name)) {
                 return createFolder(name + " (1)", parent);

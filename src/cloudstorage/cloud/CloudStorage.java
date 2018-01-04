@@ -5,7 +5,10 @@ import cloudstorage.cloud.repository.CSRepositorySQLContext;
 import cloudstorage.shared.Account;
 import cloudstorage.shared.ICloudStorage;
 import cloudstorage.shared.IStorage;
+import cloudstorage.storage.IStorageServer;
 import cloudstorage.storage.Storage;
+import cloudstorage.storage.StorageServer;
+
 import java.net.InetAddress;
 import java.rmi.RemoteException;
 import java.net.UnknownHostException;
@@ -19,11 +22,12 @@ import java.util.logging.Logger;
 public class CloudStorage extends UnicastRemoteObject implements ICloudStorage {
     private static final Logger LOGGER = Logger.getLogger(CloudStorage.class.getName());
 
-    private static final String BINDINGNAME = "CloudStorage";
+    private static final String BINDING_NAME = "CloudStorage";
 
     private CSRepository repository;
 
-    private List<Storage> storages = new ArrayList<>();
+    private List<IStorage> storages = new ArrayList<>();
+    private List<IStorageServer> waitingServers = new ArrayList<>();
 
     public CloudStorage() throws RemoteException {
         startCloudStorage();
@@ -35,7 +39,19 @@ public class CloudStorage extends UnicastRemoteObject implements ICloudStorage {
         if (repository.login(username, password)) {
             try {
                 Account a = repository.getAccount(username);
-                return new Storage(this, repository.getStorageId(a.getId()));
+                IStorage s;
+
+                if (waitingServers.size() > 0) {
+                    IStorageServer server = waitingServers.get(0);
+                    s = server.assignStorage(this, repository.getStorageId(a.getId()));
+                    waitingServers.remove(server);
+                    System.out.println(waitingServers.size());
+                } else {
+                    s = new Storage(this, repository.getStorageId(a.getId()));
+                }
+
+                storages.add(s);
+                return s;
             } catch (RemoteException e) {
                 LOGGER.severe("CloudStorage: Cannot login");
                 LOGGER.severe("CloudStorage: RemoteException: " + e.getMessage());
@@ -45,8 +61,9 @@ public class CloudStorage extends UnicastRemoteObject implements ICloudStorage {
     }
 
     @Override
-    public boolean registerStorage(Storage storage) throws RemoteException {
-        storages.add(storage);
+    public boolean registerStorageServer(IStorageServer server) {
+        waitingServers.add(server);
+        System.out.println(waitingServers.size());
         return true;
     }
 
@@ -54,7 +71,9 @@ public class CloudStorage extends UnicastRemoteObject implements ICloudStorage {
         if (repository.register(username, password, email)) {
             try {
                 Account a = repository.getAccount(username);
-                return new Storage(this, repository.getStorageId(a.getId()));
+                Storage s = new Storage(this, repository.getStorageId(a.getId()));
+                storages.add(s);
+                return s;
             } catch (RemoteException e) {
                 LOGGER.severe("CloudStorage: Cannot register");
                 LOGGER.severe("CloudStorage: RemoteException: " + e.getMessage());
@@ -64,7 +83,15 @@ public class CloudStorage extends UnicastRemoteObject implements ICloudStorage {
     }
 
     public void logout(int session) {
-        throw new UnsupportedOperationException();
+        for (IStorage s : storages) {
+            try {
+                if (session == s.getId()) {
+                    storages.remove(s);
+                }
+            } catch (RemoteException e) {
+                e.printStackTrace();
+            }
+        }
     }
 
     private void startCloudStorage() {
@@ -91,7 +118,7 @@ public class CloudStorage extends UnicastRemoteObject implements ICloudStorage {
 
         try {
             if (registry != null) {
-                registry.rebind(BINDINGNAME, this);
+                registry.rebind(BINDING_NAME, this);
                 LOGGER.info("CloudStorage: CloudStorage bound to registry");
             }
         } catch (RemoteException e) {

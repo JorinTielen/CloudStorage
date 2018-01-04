@@ -14,6 +14,8 @@ public interface IStorage extends Remote {
      */
     Folder getRoot() throws RemoteException;
 
+    int getId() throws RemoteException;
+
     Folder getFiles() throws RemoteException;
 
     /**

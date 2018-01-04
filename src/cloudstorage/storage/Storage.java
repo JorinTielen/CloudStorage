@@ -27,8 +27,9 @@ public class Storage extends UnicastRemoteObject implements IStorage, IFileProvi
     private Folder files;
     private Folder shared;
 
-    public Storage(CloudStorage cloudStorage, int id) throws RemoteException {
+    public Storage(ICloudStorage cloudStorage, int id) throws RemoteException {
         this.cloudStorage = cloudStorage;
+        this.id = id;
 
         this.repository = new SRepository(new SRepositorySQLContext());
         loadFromDB();
@@ -41,8 +42,6 @@ public class Storage extends UnicastRemoteObject implements IStorage, IFileProvi
             LOGGER.severe("Storage: RemoteException " + e.getMessage());
             throw e;
         }
-
-        cloudStorage.registerStorage(this);
     }
 
     private void loadFromDB() {
@@ -64,6 +63,10 @@ public class Storage extends UnicastRemoteObject implements IStorage, IFileProvi
     @Override
     public Folder getShared() {
         return shared;
+    }
+
+    public int getId() {
+        return id;
     }
 
     @Override

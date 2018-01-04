@@ -37,12 +37,12 @@ public class CloudStorageFX extends Application {
 
     @Override
     public void start(Stage stage) {
-        client = new Client();
+        client = new Client(this);
 
         showLogInUI(stage);
     }
 
-    private void updateFileList() {
+    public void updateFileList() {
         Folder openFolder = client.getSelectedFolder();
         List<IViewable> viewable = new ArrayList<>();
         viewable.addAll(openFolder.getChildren());
@@ -130,12 +130,7 @@ public class CloudStorageFX extends Application {
         fileSelection.getChildren().add(buttons);
 
         Button btnBack = new Button("<-");
-        btnBack.setOnAction(event -> {
-            if (client.getSelectedFolder() != client.getRoot()) {
-                client.selectFolder(client.getSelectedFolder().getParent());
-                updateFileList();
-            }
-        });
+
         buttons.getChildren().add(btnBack);
 
         Button btnNewFile = new Button("New File");
@@ -163,6 +158,7 @@ public class CloudStorageFX extends Application {
             Optional<String> result = dialog.showAndWait();
 
             result.ifPresent(name -> client.createFolder(name));
+
             updateFileList();
         });
         buttons.getChildren().add(btnCreateFolder);
@@ -177,11 +173,30 @@ public class CloudStorageFX extends Application {
                     IViewable selectedItem = files.getSelectionModel().getSelectedItem();
                     if (selectedItem instanceof Folder) {
                         client.selectFolder((Folder) selectedItem);
+
+                        if (selectedItem.getName().equals("Shared with You")) {
+                            btnCreateFolder.setDisable(true);
+                            btnNewFile.setDisable(true);
+                        } else {
+                            btnCreateFolder.setDisable(false);
+                            btnNewFile.setDisable(false);
+                        }
                     }
                     updateFileList();
                 }
             }
         });
+
+        btnBack.setOnAction(event -> {
+            if (client.getSelectedFolder() != client.getRoot()) {
+                client.selectFolder(client.getSelectedFolder().getParent());
+                updateFileList();
+            }
+
+            btnCreateFolder.setDisable(false);
+            btnNewFile.setDisable(false);
+        });
+
         fileSelection.getChildren().add(files);
 
         Scene scene = new Scene(root, 350, 400);

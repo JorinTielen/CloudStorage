@@ -16,11 +16,13 @@ public class Client {
     private static final Logger LOGGER = Logger.getLogger(Client.class.getName());
 
     private ICloudStorage cloudStorage;
+    private CloudStorageFX ui;
 
     private Integer session;
     private LocalStorage localStorage;
 
-    Client() {
+    Client(CloudStorageFX ui) {
+        this.ui = ui;
         connectToCloudStorage("192.168.0.20");
     }
 
@@ -29,7 +31,7 @@ public class Client {
             try {
                 IStorage remoteStorage = cloudStorage.login(username, password);
                 if (remoteStorage != null) {
-                    localStorage = new LocalStorage(remoteStorage);
+                    localStorage = new LocalStorage(remoteStorage, this);
                     LOGGER.info("Client: Login successful");
                     return true;
                 } else {
@@ -50,7 +52,7 @@ public class Client {
             try {
                 IStorage remoteStorage = cloudStorage.register(username, email, password);
                 if (remoteStorage != null) {
-                    localStorage = new LocalStorage(remoteStorage);
+                    localStorage = new LocalStorage(remoteStorage, this);
                     LOGGER.info("Client: Register successful");
                     return true;
                 } else {
@@ -84,6 +86,10 @@ public class Client {
 
     public boolean createFile(String name) {
         return localStorage.createFile(name);
+    }
+
+    public void updateUI() {
+        ui.updateFileList();
     }
 
     private void connectToCloudStorage(String ip) {

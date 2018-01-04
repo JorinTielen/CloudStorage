@@ -3,8 +3,6 @@ package cloudstorage.storage.repository;
 import cloudstorage.shared.Account;
 import cloudstorage.shared.Folder;
 
-import java.util.List;
-
 public class SRepository {
     private ISRepositoryContext context;
 

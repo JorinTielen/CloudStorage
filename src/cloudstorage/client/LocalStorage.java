@@ -4,6 +4,8 @@ import cloudstorage.shared.Account;
 import cloudstorage.shared.Folder;
 import cloudstorage.shared.IStorage;
 import fontyspublisher.IRemotePropertyListener;
+import javafx.application.Platform;
+
 import java.beans.PropertyChangeEvent;
 import java.rmi.RemoteException;
 import java.rmi.server.UnicastRemoteObject;
@@ -12,15 +14,17 @@ import java.util.logging.Logger;
 public class LocalStorage extends UnicastRemoteObject implements IRemotePropertyListener {
     private static final Logger LOGGER = Logger.getLogger(LocalStorage.class.getName());
 
-    private Account owner;
     private IStorage remoteStorage;
+    private Client client;
+
+    private Account owner;
     private Folder root;
 
     private Folder selectedFolder;
 
-
-    LocalStorage(IStorage remoteStorage) throws RemoteException {
+    LocalStorage(IStorage remoteStorage, Client client) throws RemoteException {
         this.remoteStorage = remoteStorage;
+        this.client = client;
         subscribeToRemote();
 
         this.owner = remoteStorage.getOwner();
@@ -30,10 +34,12 @@ public class LocalStorage extends UnicastRemoteObject implements IRemoteProperty
 
     @Override
     public void propertyChange(PropertyChangeEvent propertyChangeEvent) {
-        int selectedfolder_id = selectedFolder.getId();
+        int selected_id = selectedFolder.getId();
 
         root = (Folder) propertyChangeEvent.getNewValue();
-        selectedFolder = root.getFolder(selectedfolder_id);
+        selectedFolder = root.getFolder(selected_id);
+
+        Platform.runLater(() -> client.updateUI());
     }
 
     public Folder getRoot() {

@@ -83,6 +83,7 @@ public class Storage extends UnicastRemoteObject implements IStorage, IFileProvi
             return false;
         }
 
+        //no duplicate names
         for (Folder f : parent.getChildren()) {
             if (f.getName().equals(name)) {
                 return createFolder(name + " (1)", parent);
@@ -102,6 +103,23 @@ public class Storage extends UnicastRemoteObject implements IStorage, IFileProvi
 
     @Override
     public boolean createFile(String name, Folder parent) {
+        //You are not allowed to name the file these names
+        if ("Your Storage".equals(name) || "Shared with You".equals(name) || "root".equals(name)) {
+            return false;
+        }
+
+        //You are not allowed to make files in the root or shared folder.
+        if (parent.getName().equals("root") || parent.getName().equals("Shared with You")) {
+            return false;
+        }
+
+        //no duplicate names
+        for (Folder f : parent.getChildren()) {
+            if (f.getName().equals(name)) {
+                return createFolder(name + " (1)", parent);
+            }
+        }
+
         boolean success = parent.addFile(name);
         try {
             publisher.inform("root", null, root);

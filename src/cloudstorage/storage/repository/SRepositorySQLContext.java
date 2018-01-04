@@ -45,9 +45,7 @@ public class SRepositorySQLContext implements ISRepositoryContext {
 
         //Now, get all it's children
         if (root != null) {
-            for (Folder f : getFolderChildren(owner, root.getId())) {
-                root.getChildren().add(f);
-            }
+            getFolderChildren(owner, root);
         }
 
         //TODO: Get the folder's files.
@@ -55,20 +53,23 @@ public class SRepositorySQLContext implements ISRepositoryContext {
         return root;
     }
 
-    public List<Folder> getFolderChildren(Account owner, int folder_id) {
+    public void getFolderChildren(Account owner, Folder folder) {
         String SQL = "SELECT id, \"name\" FROM folders WHERE parent_id = ?";
-
-        List<Folder> folders = new ArrayList<>();
 
         connector.openConnection();
         try (PreparedStatement pStmt = connector.con.prepareStatement(SQL)) {
-            pStmt.setInt(1, folder_id);
+            pStmt.setInt(1, folder.getId());
             try (ResultSet results = pStmt.executeQuery()) {
                 while (results.next()) {
-                    folders.add(new Folder(
+                    Folder a = new Folder(
                             results.getInt("id"),
                             results.getString("name"),
-                            owner));
+                            owner);
+
+                    getFolderChildren(owner, a);
+
+                    folder.getChildren().add(a);
+                    a.setParent(folder);
                 }
             }
         } catch (SQLException e) {
@@ -77,7 +78,28 @@ public class SRepositorySQLContext implements ISRepositoryContext {
         } finally {
             connector.closeConnection();
         }
+    }
 
-        return folders;
+    @Override
+    public boolean addFolder(Account owner, String name, Folder parent) {
+        String SQL = "INSERT INTO folders (\"name\", parent_id, owner_id) VALUES (?, ?, ?)";
+
+        connector.openConnection();
+        try (PreparedStatement pStmt = connector.con.prepareStatement(SQL)) {
+            pStmt.setString(1, name);
+            pStmt.setInt(2, parent.getId());
+            pStmt.setInt(3, owner.getId());
+
+            pStmt.executeUpdate();
+
+            return true;
+        } catch (SQLException e) {
+            LOGGER.severe("SQLContext: SQLException when trying to connect");
+            LOGGER.severe("SQLContext: SQLException: " + e.getMessage());
+        } finally {
+            connector.closeConnection();
+        }
+
+        return false;
     }
 }

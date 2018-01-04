@@ -16,7 +16,11 @@ public class SRepository {
         return this.context.getRoot(owner);
     }
 
-    public List<Folder> getFolderChildren(Account owner, int folder_id) {
-        return this.context.getFolderChildren(owner, folder_id);
+    public void getFolderChildren(Account owner, Folder folder) {
+        this.context.getFolderChildren(owner, folder);
+    }
+
+    public boolean addFolder(Account owner, String name, Folder parent) {
+        return this.context.addFolder(owner, name, parent);
     }
 }

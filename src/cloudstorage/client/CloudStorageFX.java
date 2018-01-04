@@ -43,7 +43,7 @@ public class CloudStorageFX extends Application {
     }
 
     private void updateFileList() {
-        Folder openFolder = client.getCurrentFolder();
+        Folder openFolder = client.getSelectedFolder();
         List<IViewable> viewable = new ArrayList<>();
         viewable.addAll(openFolder.getChildren());
         viewable.addAll(openFolder.getFiles());
@@ -131,8 +131,8 @@ public class CloudStorageFX extends Application {
 
         Button btnBack = new Button("<-");
         btnBack.setOnAction(event -> {
-            if (client.getCurrentFolder() != client.getRoot()) {
-                client.selectFolder(client.getCurrentFolder().getParent());
+            if (client.getSelectedFolder() != client.getRoot()) {
+                client.selectFolder(client.getSelectedFolder().getParent());
                 updateFileList();
             }
         });

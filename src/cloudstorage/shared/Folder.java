@@ -2,7 +2,6 @@ package cloudstorage.shared;
 
 import java.io.Serializable;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 
 public class Folder implements IViewable, Serializable {
@@ -30,9 +29,41 @@ public class Folder implements IViewable, Serializable {
     }
 
     public Folder getFolder(String name) {
+        if (name.equals(this.name)) {
+            return this;
+        }
+
         for (Folder f : children) {
             if (f.name.equals(name)) {
                 return f;
+            }
+        }
+
+        for (Folder f : children) {
+            Folder correctFolder = f.getFolder(name);
+            if (correctFolder != null) {
+                return correctFolder;
+            }
+        }
+
+        return null;
+    }
+
+    public Folder getFolder(int id) {
+        if (id == this.id) {
+            return this;
+        }
+
+        for (Folder f : children) {
+            if (f.id == id) {
+                return f;
+            }
+        }
+
+        for (Folder f : children) {
+            Folder correctFolder = f.getFolder(id);
+            if (correctFolder != null) {
+                return correctFolder;
             }
         }
 
@@ -54,6 +85,10 @@ public class Folder implements IViewable, Serializable {
 
     public Folder getParent() {
         return parent;
+    }
+
+    public void setParent(Folder parent) {
+        this.parent = parent;
     }
 
     public List<Folder> getChildren() {

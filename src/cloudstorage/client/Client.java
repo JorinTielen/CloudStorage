@@ -20,8 +20,6 @@ public class Client {
     private Integer session;
     private LocalStorage localStorage;
 
-    private Folder currentFolder;
-
     Client() {
         connectToCloudStorage("192.168.0.20");
     }
@@ -32,7 +30,6 @@ public class Client {
                 IStorage remoteStorage = cloudStorage.login(username, password);
                 if (remoteStorage != null) {
                     localStorage = new LocalStorage(remoteStorage);
-                    currentFolder = localStorage.getRoot();
                     LOGGER.info("Client: Login successful");
                     return true;
                 } else {
@@ -54,7 +51,6 @@ public class Client {
                 IStorage remoteStorage = cloudStorage.register(username, email, password);
                 if (remoteStorage != null) {
                     localStorage = new LocalStorage(remoteStorage);
-                    currentFolder = localStorage.getRoot();
                     LOGGER.info("Client: Register successful");
                     return true;
                 } else {
@@ -74,21 +70,20 @@ public class Client {
         return localStorage.getRoot();
     }
 
-    public Folder getCurrentFolder() {
-        //currentFolder = localStorage.getFolder(currentFolder.getId(), currentFolder.getName());
-        return currentFolder;
+    public Folder getSelectedFolder() {
+        return localStorage.getSelectedFolder();
     }
 
     public void selectFolder(Folder folder) {
-        currentFolder = folder;
+        localStorage.selectFolder(folder);
     }
 
     public boolean createFolder(String name) {
-        return localStorage.createFolder(name, getCurrentFolder());
+        return localStorage.createFolder(name);
     }
 
     public boolean createFile(String name) {
-        return localStorage.createFile(name, currentFolder);
+        return localStorage.createFile(name);
     }
 
     private void connectToCloudStorage(String ip) {

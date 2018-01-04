@@ -3,9 +3,8 @@ package cloudstorage.storage.repository;
 import cloudstorage.shared.Account;
 import cloudstorage.shared.Folder;
 
-import java.util.List;
-
 public interface ISRepositoryContext {
     Folder getRoot(Account owner);
-    List<Folder> getFolderChildren(Account owner, int folder_id);
+    void getFolderChildren(Account owner, Folder folder);
+    boolean addFolder(Account owner, String name, Folder parent);
 }

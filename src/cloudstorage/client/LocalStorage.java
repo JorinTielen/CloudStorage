@@ -12,10 +12,12 @@ import java.util.logging.Logger;
 public class LocalStorage extends UnicastRemoteObject implements IRemotePropertyListener {
     private static final Logger LOGGER = Logger.getLogger(LocalStorage.class.getName());
 
+    private Account owner;
     private IStorage remoteStorage;
     private Folder root;
 
-    private Account owner;
+    private Folder selectedFolder;
+
 
     LocalStorage(IStorage remoteStorage) throws RemoteException {
         this.remoteStorage = remoteStorage;
@@ -23,20 +25,32 @@ public class LocalStorage extends UnicastRemoteObject implements IRemoteProperty
 
         this.owner = remoteStorage.getOwner();
         this.root = remoteStorage.getRoot();
+        this.selectedFolder = root;
     }
 
     @Override
     public void propertyChange(PropertyChangeEvent propertyChangeEvent) {
+        int selectedfolder_id = selectedFolder.getId();
+
         root = (Folder) propertyChangeEvent.getNewValue();
+        selectedFolder = root.getFolder(selectedfolder_id);
     }
 
     public Folder getRoot() {
         return root;
     }
 
-    public boolean createFolder(String name, Folder parent) {
+    public Folder getSelectedFolder() {
+        return selectedFolder;
+    }
+
+    public void selectFolder(Folder folder) {
+        selectedFolder = root.getFolder(folder.getId());
+    }
+
+    public boolean createFolder(String name) {
         try {
-            return remoteStorage.createFolder(name, parent);
+            return remoteStorage.createFolder(name, selectedFolder);
         } catch (RemoteException e) {
             LOGGER.severe("LocalStorage: RemoteException when trying to create folder");
             LOGGER.severe("LocalStorage: RemoteException: " + e.getMessage());
@@ -44,9 +58,9 @@ public class LocalStorage extends UnicastRemoteObject implements IRemoteProperty
         }
     }
 
-    public boolean createFile(String name, Folder parent) {
+    public boolean createFile(String name) {
         try {
-            return remoteStorage.createFile(name, parent);
+            return remoteStorage.createFile(name, selectedFolder);
         } catch (RemoteException e) {
             LOGGER.severe("LocalStorage: RemoteException when trying to create file");
             LOGGER.severe("LocalStorage: RemoteException: " + e.getMessage());
@@ -62,5 +76,4 @@ public class LocalStorage extends UnicastRemoteObject implements IRemoteProperty
             LOGGER.severe("LocalStorage: RemoteException: " + e.getMessage());
         }
     }
-
 }

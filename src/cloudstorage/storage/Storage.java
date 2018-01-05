@@ -2,7 +2,9 @@ package cloudstorage.storage;
 
 import cloudstorage.cloud.CloudStorage;
 import cloudstorage.shared.*;
+import cloudstorage.storage.repository.ISRepositoryContext;
 import cloudstorage.storage.repository.SRepository;
+import cloudstorage.storage.repository.SRepositoryLocalContext;
 import cloudstorage.storage.repository.SRepositorySQLContext;
 import fontyspublisher.IRemotePropertyListener;
 import fontyspublisher.RemotePublisher;
@@ -27,13 +29,15 @@ public class Storage extends UnicastRemoteObject implements IStorage, IFileProvi
     private Folder files;
     private Folder shared;
 
-    public Storage(Account owner, ICloudStorage cloudStorage, int id) throws RemoteException {
+    public Storage(Account owner, ICloudStorage cloudStorage, int id, boolean localContext) throws RemoteException {
         this.cloudStorage = cloudStorage;
 
         this.id = id;
         this.owner = owner;
 
-        this.repository = new SRepository(new SRepositorySQLContext());
+        if (localContext) this.repository = new SRepository(new SRepositoryLocalContext());
+        else this.repository = new SRepository(new SRepositorySQLContext());
+
         loadFromDB();
 
         try {
@@ -136,7 +140,7 @@ public class Storage extends UnicastRemoteObject implements IStorage, IFileProvi
     }
 
     @Override
-    public Account getOwner() throws RemoteException {
+    public Account getOwner() {
         return owner;
     }
 

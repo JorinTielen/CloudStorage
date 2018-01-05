@@ -8,6 +8,7 @@ import cloudstorage.shared.IStorage;
 import cloudstorage.storage.IStorageServer;
 import cloudstorage.storage.Storage;
 import cloudstorage.storage.StorageServer;
+import cloudstorage.storage.repository.SRepositorySQLContext;
 
 import java.net.InetAddress;
 import java.rmi.RemoteException;
@@ -47,7 +48,7 @@ public class CloudStorage extends UnicastRemoteObject implements ICloudStorage {
                     waitingServers.remove(server);
                     System.out.println(waitingServers.size());
                 } else {
-                    s = new Storage(a, this, repository.getStorageId(a.getId()));
+                    s = new Storage(a, this, repository.getStorageId(a.getId()), false);
                 }
 
                 storages.add(s);
@@ -76,7 +77,7 @@ public class CloudStorage extends UnicastRemoteObject implements ICloudStorage {
         if (repository.register(username, password, email)) {
             try {
                 Account a = repository.getAccount(username);
-                Storage s = new Storage(a, this, repository.getStorageId(a.getId()));
+                Storage s = new Storage(a, this, repository.getStorageId(a.getId()), false);
                 storages.add(s);
                 return s;
             } catch (RemoteException e) {

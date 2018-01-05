@@ -4,6 +4,7 @@ import cloudstorage.cloud.CloudStorage;
 import cloudstorage.shared.Account;
 import cloudstorage.shared.ICloudStorage;
 import cloudstorage.shared.IStorage;
+import cloudstorage.storage.repository.SRepositorySQLContext;
 
 import java.rmi.NotBoundException;
 import java.rmi.Remote;
@@ -29,7 +30,7 @@ public class StorageServer extends UnicastRemoteObject implements IStorageServer
 
     public IStorage assignStorage(Account owner, ICloudStorage cloudStorage, int id) {
         try {
-            this.storage = new Storage(owner, cloudStorage, id);
+            this.storage = new Storage(owner, cloudStorage, id, false);
         } catch (RemoteException e) {
             e.printStackTrace();
         }

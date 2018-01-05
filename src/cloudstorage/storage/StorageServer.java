@@ -1,6 +1,7 @@
 package cloudstorage.storage;
 
 import cloudstorage.cloud.CloudStorage;
+import cloudstorage.shared.Account;
 import cloudstorage.shared.ICloudStorage;
 import cloudstorage.shared.IStorage;
 
@@ -26,9 +27,9 @@ public class StorageServer extends UnicastRemoteObject implements IStorageServer
         waiting = true;
     }
 
-    public IStorage assignStorage(ICloudStorage cloudStorage, int id) {
+    public IStorage assignStorage(Account owner, ICloudStorage cloudStorage, int id) {
         try {
-            this.storage = new Storage(cloudStorage, id);
+            this.storage = new Storage(owner, cloudStorage, id);
         } catch (RemoteException e) {
             e.printStackTrace();
         }

@@ -43,11 +43,11 @@ public class CloudStorage extends UnicastRemoteObject implements ICloudStorage {
 
                 if (waitingServers.size() > 0) {
                     IStorageServer server = waitingServers.get(0);
-                    s = server.assignStorage(this, repository.getStorageId(a.getId()));
+                    s = server.assignStorage(a, this, repository.getStorageId(a.getId()));
                     waitingServers.remove(server);
                     System.out.println(waitingServers.size());
                 } else {
-                    s = new Storage(this, repository.getStorageId(a.getId()));
+                    s = new Storage(a, this, repository.getStorageId(a.getId()));
                 }
 
                 storages.add(s);
@@ -76,7 +76,7 @@ public class CloudStorage extends UnicastRemoteObject implements ICloudStorage {
         if (repository.register(username, password, email)) {
             try {
                 Account a = repository.getAccount(username);
-                Storage s = new Storage(this, repository.getStorageId(a.getId()));
+                Storage s = new Storage(a, this, repository.getStorageId(a.getId()));
                 storages.add(s);
                 return s;
             } catch (RemoteException e) {

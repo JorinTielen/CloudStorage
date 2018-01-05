@@ -125,10 +125,11 @@ public class Storage extends UnicastRemoteObject implements IStorage, IFileProvi
         //no duplicate names
         for (Folder f : parent.getChildren()) {
             if (f.getName().equals(name)) {
-                return createFolder(name + " (1)", parent);
+                return createFile(name + " (1)", parent);
             }
         }
 
+        //TODO: Add in Database
         boolean success = parent.addFile(name);
         try {
             publisher.inform("root", null, root);

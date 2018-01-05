@@ -146,8 +146,12 @@ public class CloudStorageFX extends Application {
         });
         buttons.getChildren().add(btnNewFile);
 
-        Button btnDownloadFile = new Button("Download File");
-        buttons.getChildren().add(btnDownloadFile);
+        Button btnOpenFile = new Button("Open File");
+        btnOpenFile.setOnAction(event -> {
+            showFileUI();
+            stage.close();
+        });
+        buttons.getChildren().add(btnOpenFile);
 
         Button btnCreateFolder = new Button("Create Folder");
         btnCreateFolder.setOnAction(event -> {
@@ -176,10 +180,10 @@ public class CloudStorageFX extends Application {
 
                         if (selectedItem.getName().equals("Shared with You")) {
                             btnCreateFolder.setDisable(true);
-                            btnNewFile.setDisable(true);
+                            btnOpenFile.setDisable(true);
                         } else {
                             btnCreateFolder.setDisable(false);
-                            btnNewFile.setDisable(false);
+                            btnOpenFile.setDisable(false);
                         }
                     }
                     updateFileList();
@@ -194,7 +198,7 @@ public class CloudStorageFX extends Application {
             }
 
             btnCreateFolder.setDisable(false);
-            btnNewFile.setDisable(false);
+            btnOpenFile.setDisable(false);
         });
 
         fileSelection.getChildren().add(files);
@@ -254,6 +258,16 @@ public class CloudStorageFX extends Application {
         Scene scene = new Scene(root, 300, 275);
 
         stage.setTitle("register");
+        stage.setScene(scene);
+        stage.show();
+    }
+
+    private void showFileUI() {
+        Stage stage = new Stage();
+        Group root = new Group();
+
+        Scene scene = new Scene(root, 400, 500);
+        stage.setTitle("File");
         stage.setScene(scene);
         stage.show();
     }

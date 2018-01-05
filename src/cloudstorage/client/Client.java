@@ -26,6 +26,10 @@ public class Client {
         connectToCloudStorage("192.168.0.20");
     }
 
+    Client() {
+        //ONLY FOR TESTING PURPOSES!!!
+    }
+
     public boolean login(String username, String password) {
         if (cloudStorage != null) {
             try {

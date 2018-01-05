@@ -95,18 +95,6 @@ public class Folder implements IViewable, Serializable {
         return children;
     }
 
-    public boolean addFolder(String name) {
-        for (Folder f : children) {
-            if (f.getName().equals(name)) {
-                return false;
-            }
-        }
-
-        Folder f = new Folder(8, name, owner, this);
-        children.add(f);
-        return true;
-    }
-
     public boolean addFile(String name) {
         for (File f : files) {
             if (f.getName().equals(name)) {

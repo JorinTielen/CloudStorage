@@ -32,6 +32,16 @@ public class LocalStorage extends UnicastRemoteObject implements IRemoteProperty
         this.selectedFolder = root;
     }
 
+    LocalStorage(IStorage remoteStorage, Client client, boolean test) throws RemoteException {
+        this.remoteStorage = remoteStorage;
+        this.client = client;
+        subscribeToRemote();
+
+        this.owner = remoteStorage.getOwner();
+        this.root = remoteStorage.getRoot();
+        this.selectedFolder = root;
+    }
+
     @Override
     public void propertyChange(PropertyChangeEvent propertyChangeEvent) {
         int selected_id = selectedFolder.getId();

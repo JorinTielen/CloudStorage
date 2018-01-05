@@ -1,6 +1,7 @@
 package cloudstorage.cloud;
 
 import cloudstorage.cloud.repository.CSRepository;
+import cloudstorage.cloud.repository.CSRepositoryLocalContext;
 import cloudstorage.cloud.repository.CSRepositorySQLContext;
 import cloudstorage.shared.Account;
 import cloudstorage.shared.ICloudStorage;
@@ -22,6 +23,7 @@ import java.util.logging.Logger;
 
 public class CloudStorage extends UnicastRemoteObject implements ICloudStorage {
     private static final Logger LOGGER = Logger.getLogger(CloudStorage.class.getName());
+    private boolean localTest = false;
 
     private static final String BINDING_NAME = "CloudStorage";
 
@@ -36,6 +38,11 @@ public class CloudStorage extends UnicastRemoteObject implements ICloudStorage {
         repository = new CSRepository(new CSRepositorySQLContext());
     }
 
+    public CloudStorage(boolean test) throws RemoteException {
+        localTest = test;
+        repository = new CSRepository(new CSRepositoryLocalContext());
+    }
+
     public IStorage login(String username, String password) {
         if (repository.login(username, password)) {
             try {
@@ -48,7 +55,7 @@ public class CloudStorage extends UnicastRemoteObject implements ICloudStorage {
                     waitingServers.remove(server);
                     System.out.println(waitingServers.size());
                 } else {
-                    s = new Storage(a, this, repository.getStorageId(a.getId()), false);
+                    s = new Storage(a, this, repository.getStorageId(a.getId()), localTest);
                 }
 
                 storages.add(s);
@@ -77,7 +84,7 @@ public class CloudStorage extends UnicastRemoteObject implements ICloudStorage {
         if (repository.register(username, password, email)) {
             try {
                 Account a = repository.getAccount(username);
-                Storage s = new Storage(a, this, repository.getStorageId(a.getId()), false);
+                Storage s = new Storage(a, this, repository.getStorageId(a.getId()), localTest);
                 storages.add(s);
                 return s;
             } catch (RemoteException e) {

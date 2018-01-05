@@ -21,7 +21,7 @@ class LocalStorageTest {
         Account a = new Account(1, "jorin", "jorin@mail.com");
         CloudStorage cloudStorage = null;
         try {
-            cloudStorage = new CloudStorage();
+            cloudStorage = new CloudStorage(true);
         } catch (RemoteException e) {
             fail("cloudStorage could not be created: " + e.getMessage());
         }
@@ -33,7 +33,7 @@ class LocalStorageTest {
         }
 
         try {
-            this.localStorage = new LocalStorage(remoteStorage, client);
+            this.localStorage = new LocalStorage(remoteStorage, client, true);
         } catch (RemoteException e) {
             fail("localStorage could not be created: " + e.getMessage());
         }

@@ -15,7 +15,7 @@ class StorageTest {
 
     public StorageTest() {
         try {
-            cloudStorage = new CloudStorage();
+            cloudStorage = new CloudStorage(true);
         } catch (RemoteException e) {
             fail("CloudStorage could not be created: " + e.getMessage());
         }

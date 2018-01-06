@@ -21,4 +21,8 @@ public class SRepository {
     public boolean addFolder(Account owner, String name, Folder parent) {
         return this.context.addFolder(owner, name, parent);
     }
+
+    public boolean addFile(String name, Folder parent, Account owner) {
+        return this.context.addFile(name, parent, owner);
+    }
 }

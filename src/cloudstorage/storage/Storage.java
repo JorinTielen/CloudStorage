@@ -129,8 +129,7 @@ public class Storage extends UnicastRemoteObject implements IStorage, IFileProvi
             }
         }
 
-        //TODO: Add in Database
-        boolean success = parent.addFile(name);
+        boolean success = repository.addFile(name, parent, owner);
         try {
             publisher.inform("root", null, root);
         } catch (RemoteException e) {

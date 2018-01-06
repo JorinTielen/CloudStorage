@@ -1,7 +1,9 @@
 package cloudstorage.storage.repository;
 
 import cloudstorage.shared.Account;
+import cloudstorage.shared.File;
 import cloudstorage.shared.Folder;
+import sun.reflect.generics.reflectiveObjects.NotImplementedException;
 
 public class SRepositoryLocalContext implements ISRepositoryContext {
 
@@ -33,6 +35,12 @@ public class SRepositoryLocalContext implements ISRepositoryContext {
         }
 
         return addFolder(root, parent, name);
+    }
+
+    @Override
+    public boolean addFile(String name, Folder parent, Account owner) {
+        parent.getFiles().add(new File(nextId, name, owner, parent));
+        return true;
     }
 
     private boolean addFolder(Folder root, Folder parent, String name) {

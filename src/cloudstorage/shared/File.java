@@ -1,6 +1,7 @@
 package cloudstorage.shared;
 
 import java.io.Serializable;
+import java.time.LocalDate;
 import java.util.Date;
 
 public class File implements IViewable, Serializable {
@@ -10,28 +11,33 @@ public class File implements IViewable, Serializable {
     private Folder location;
     private Account owner;
 
-    private String locationOnDisk;
+    private String text;
 
-    private Date createdAt;
-    private Date editedAt;
+    private LocalDate createdAt;
+    private LocalDate editedAt;
 
-    public File(String name, int size, Account owner) {
+    public File(int id, String name, Account owner, Folder location) {
+        this.id = id;
         this.name = name;
-        this.size = size;
         this.owner = owner;
+
+        this.location = location;
+
+        this.size = 0;
+        this.text = "";
     }
 
-    public File(int id, String name, int size, Folder location, Account owner, String locationOnDisk) {
+    public File(int id, String name, int size, Folder location, Account owner, String text) {
         this.id = id;
         this.name = name;
         this.size = size;
         this.location = location;
         this.owner = owner;
-        this.locationOnDisk = locationOnDisk;
+        this.text = text;
     }
 
-    public File(int id, String name, int size, Folder location, Account owner, String locationOnDisk, Date createdAt, Date editedAt) {
-        this(id, name, size, location, owner, locationOnDisk);
+    public File(int id, String name, int size, Folder location, Account owner, String text, LocalDate createdAt, LocalDate editedAt) {
+        this(id, name, size, location, owner, text);
 
         this.createdAt = createdAt;
         this.editedAt = editedAt;
@@ -48,6 +54,10 @@ public class File implements IViewable, Serializable {
 
     public void editContent() {
 
+    }
+
+    public String getText() {
+        return text;
     }
 
     public Integer getId() {

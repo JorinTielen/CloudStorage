@@ -95,18 +95,6 @@ public class Folder implements IViewable, Serializable {
         return children;
     }
 
-    public boolean addFile(String name) {
-        for (File f : files) {
-            if (f.getName().equals(name)) {
-                return false;
-            }
-        }
-
-        File f = new File(name, 1, owner);
-        files.add(f);
-        return true;
-    }
-
     @Override
     public String toString() {
         return name;

@@ -1,5 +1,6 @@
 package cloudstorage.client;
 
+import cloudstorage.shared.File;
 import cloudstorage.shared.Folder;
 import cloudstorage.shared.IViewable;
 import javafx.application.Application;
@@ -11,9 +12,7 @@ import javafx.scene.Node;
 import javafx.scene.Scene;
 import javafx.scene.control.*;
 import javafx.scene.input.MouseButton;
-import javafx.scene.layout.GridPane;
-import javafx.scene.layout.HBox;
-import javafx.scene.layout.VBox;
+import javafx.scene.layout.*;
 import javafx.scene.text.Font;
 import javafx.scene.text.FontWeight;
 import javafx.scene.text.Text;
@@ -43,15 +42,17 @@ public class CloudStorageFX extends Application {
     }
 
     public void updateFileList() {
-        Folder openFolder = client.getSelectedFolder();
-        List<IViewable> viewable = new ArrayList<>();
-        viewable.addAll(openFolder.getChildren());
-        viewable.addAll(openFolder.getFiles());
+        Platform.runLater(() -> {
+            Folder openFolder = client.getSelectedFolder();
+            List<IViewable> viewable = new ArrayList<>();
+            viewable.addAll(openFolder.getChildren());
+            viewable.addAll(openFolder.getFiles());
 
-        files.getItems().clear();
-        for (IViewable view : viewable) {
-            files.getItems().add(view);
-        }
+            files.getItems().clear();
+            for (IViewable view : viewable) {
+                files.getItems().add(view);
+            }
+        });
     }
     
     private void showLogInUI(Stage stage) {
@@ -130,7 +131,6 @@ public class CloudStorageFX extends Application {
         fileSelection.getChildren().add(buttons);
 
         Button btnBack = new Button("<-");
-
         buttons.getChildren().add(btnBack);
 
         Button btnNewFile = new Button("New File");
@@ -148,8 +148,11 @@ public class CloudStorageFX extends Application {
 
         Button btnOpenFile = new Button("Open File");
         btnOpenFile.setOnAction(event -> {
-            showFileUI();
-            stage.close();
+            IViewable selectedItem = files.getSelectionModel().getSelectedItem();
+            if (selectedItem instanceof File) {
+                showFileUI((File) selectedItem);
+                stage.close();
+            }
         });
         buttons.getChildren().add(btnOpenFile);
 
@@ -180,10 +183,10 @@ public class CloudStorageFX extends Application {
 
                         if (selectedItem.getName().equals("Shared with You")) {
                             btnCreateFolder.setDisable(true);
-                            btnOpenFile.setDisable(true);
+                            btnNewFile.setDisable(true);
                         } else {
                             btnCreateFolder.setDisable(false);
-                            btnOpenFile.setDisable(false);
+                            btnNewFile.setDisable(false);
                         }
                     }
                     updateFileList();
@@ -196,9 +199,6 @@ public class CloudStorageFX extends Application {
                 client.selectFolder(client.getSelectedFolder().getParent());
                 updateFileList();
             }
-
-            btnCreateFolder.setDisable(false);
-            btnOpenFile.setDisable(false);
         });
 
         fileSelection.getChildren().add(files);
@@ -262,11 +262,35 @@ public class CloudStorageFX extends Application {
         stage.show();
     }
 
-    private void showFileUI() {
+    private void showFileUI(File file) {
         Stage stage = new Stage();
         Group root = new Group();
 
-        Scene scene = new Scene(root, 400, 500);
+        VBox vert = new VBox();
+        vert.setSpacing(10);
+        root.getChildren().add(vert);
+
+        HBox hor = new HBox();
+        hor.setAlignment(Pos.CENTER);
+        hor.setSpacing(10);
+        vert.getChildren().add(hor);
+
+        Button btnEditFile = new Button("Edit File");
+        hor.getChildren().add(btnEditFile);
+
+        Button btnSaveFile = new Button("Save File");
+        hor.getChildren().add(btnSaveFile);
+
+        Label lblEditMode = new Label("Edit mode: off");
+        lblEditMode.setAlignment(Pos.BOTTOM_RIGHT);
+        hor.getChildren().add(lblEditMode);
+
+        TextArea text = new TextArea();
+        text.setMaxWidth(480);
+        text.setText(file.getText());
+        vert.getChildren().add(text);
+
+        Scene scene = new Scene(root, 480, 218);
         stage.setTitle("File");
         stage.setScene(scene);
         stage.show();

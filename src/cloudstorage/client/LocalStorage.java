@@ -4,8 +4,6 @@ import cloudstorage.shared.Account;
 import cloudstorage.shared.Folder;
 import cloudstorage.shared.IStorage;
 import fontyspublisher.IRemotePropertyListener;
-import javafx.application.Platform;
-
 import java.beans.PropertyChangeEvent;
 import java.rmi.RemoteException;
 import java.rmi.server.UnicastRemoteObject;
@@ -49,7 +47,7 @@ public class LocalStorage extends UnicastRemoteObject implements IRemoteProperty
         root = (Folder) propertyChangeEvent.getNewValue();
         selectedFolder = root.getFolder(selected_id);
 
-        Platform.runLater(() -> client.updateUI());
+        client.updateUI();
     }
 
     public Folder getRoot() {

@@ -2,6 +2,7 @@ package cloudstorage.storage;
 
 import cloudstorage.cloud.CloudStorage;
 import cloudstorage.shared.Account;
+import cloudstorage.shared.File;
 import cloudstorage.shared.Folder;
 import org.junit.jupiter.api.Assertions;
 
@@ -69,7 +70,13 @@ class StorageTest {
 
     @org.junit.jupiter.api.Test
     void createFile() {
-        fail("not implemented");
+        Folder f = storage.getFiles();
+
+        storage.createFile("test.txt", f);
+
+        File file = f.getFiles().get(0);
+
+        assertEquals("test.txt", file.getName());
     }
 
     @org.junit.jupiter.api.Test

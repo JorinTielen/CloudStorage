@@ -337,6 +337,19 @@ public class CloudStorageFX extends Application {
         });
         hor.getChildren().add(btnSaveFile);
 
+        Button btnDownloadFile = new Button("Download File");
+        btnDownloadFile.setOnAction(event -> {
+            String fileText = text.getText();
+            FileDownloader.download("", client.getRoot().getFile(file.getId()));
+            Alert alert = new Alert(Alert.AlertType.INFORMATION);
+            alert.setTitle("Downloaded file");
+            alert.setHeaderText("Succesfully downloaded file!");
+            alert.setContentText("It is saved in the application directory");
+
+            alert.showAndWait();
+        });
+        hor.getChildren().add(btnDownloadFile);
+
         Platform.setImplicitExit(false);
         stage.setOnCloseRequest(event -> {
             if (editMode) {

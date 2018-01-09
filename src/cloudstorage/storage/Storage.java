@@ -133,7 +133,7 @@ public class Storage extends UnicastRemoteObject implements IStorage, IFileProvi
         try {
             publisher.inform("root", null, root);
         } catch (RemoteException e) {
-            LOGGER.severe("Storage: Cannot create folder");
+            LOGGER.severe("Storage: Cannot create file");
             LOGGER.severe("Storage: RemoteException: " + e.getMessage());
         }
         return success;
@@ -155,12 +155,32 @@ public class Storage extends UnicastRemoteObject implements IStorage, IFileProvi
     }
 
     @Override
-    public boolean LockFile(File file, int accountId) {
-        throw new UnsupportedOperationException();
+    public boolean lockFile(File file, Account account) {
+        File realFile = root.getFile(file.getId());
+
+        boolean succes =  realFile.lock(account.getId());
+        try {
+            publisher.inform("root", null, root);
+        } catch (RemoteException e) {
+            LOGGER.severe("Storage: Cannot lock file");
+            LOGGER.severe("Storage: RemoteException: " + e.getMessage());
+        }
+        return succes;
     }
 
     @Override
-    public boolean SaveFile(File file, int accountId) {
-        throw new UnsupportedOperationException();
+    public boolean saveFile(File file, String fileText, Account account) {
+        File realFile = root.getFile(file.getId());
+        if (realFile.editText(account, fileText)) {
+            try {
+                publisher.inform("root", null, root);
+            } catch (RemoteException e) {
+                LOGGER.severe("Storage: Cannot save file");
+                LOGGER.severe("Storage: RemoteException: " + e.getMessage());
+            }
+            return repository.saveFile(realFile);
+        }
+
+        return false;
     }
 }

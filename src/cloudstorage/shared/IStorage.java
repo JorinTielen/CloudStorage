@@ -74,4 +74,8 @@ public interface IStorage extends Remote {
      * @throws RemoteException when RMI fails.
      */
     File download(int fileId) throws RemoteException;
+
+    boolean lockFile(File file, Account account) throws RemoteException;
+
+    boolean saveFile(File file, String fileText, Account account) throws RemoteException;
 }

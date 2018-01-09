@@ -1,5 +1,6 @@
 package cloudstorage.client;
 
+import cloudstorage.shared.File;
 import cloudstorage.shared.Folder;
 import cloudstorage.shared.ICloudStorage;
 import cloudstorage.shared.IStorage;
@@ -131,5 +132,13 @@ public class Client {
             LOGGER.severe("Client: NotBoundException when binding cloudStorage");
             LOGGER.severe("Client: NotBoundException: " + e.getMessage());
         }
+    }
+
+    public boolean requestEditFile(File file) {
+        return localStorage.requestEditFile(file);
+    }
+
+    public boolean saveFile(File file, String fileText) {
+        return localStorage.saveFile(file, fileText);
     }
 }

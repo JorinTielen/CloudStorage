@@ -39,8 +39,13 @@ public class SRepositoryLocalContext implements ISRepositoryContext {
 
     @Override
     public boolean addFile(String name, Folder parent, Account owner) {
-        parent.getFiles().add(new File(nextId, name, owner, parent));
+        parent.getFiles().add(new File(nextId, name, 0, parent, owner, ""));
         return true;
+    }
+
+    @Override
+    public boolean saveFile(File file) {
+        return false;
     }
 
     private boolean addFolder(Folder root, Folder parent, String name) {

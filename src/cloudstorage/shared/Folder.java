@@ -83,6 +83,41 @@ public class Folder implements IViewable, Serializable {
         return files;
     }
 
+    public File getFile(String name) {
+        for (File f : files) {
+            if (f.getName().equals(name)) {
+                return f;
+            }
+        }
+
+        for (Folder f : children) {
+            File file = f.getFile(name);
+            if (file != null) {
+                return file;
+            }
+        }
+
+        return null;
+    }
+
+    public File getFile(int id) {
+        for (File f : files) {
+            if (f.getId().equals(id)) {
+                return f;
+            }
+        }
+
+        for (Folder f : children) {
+            File file = f.getFile(id);
+            if (file != null) {
+                return file;
+            }
+        }
+
+        return null;
+    }
+
+
     public Folder getParent() {
         return parent;
     }

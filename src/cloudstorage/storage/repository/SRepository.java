@@ -1,6 +1,7 @@
 package cloudstorage.storage.repository;
 
 import cloudstorage.shared.Account;
+import cloudstorage.shared.File;
 import cloudstorage.shared.Folder;
 
 public class SRepository {
@@ -24,5 +25,9 @@ public class SRepository {
 
     public boolean addFile(String name, Folder parent, Account owner) {
         return this.context.addFile(name, parent, owner);
+    }
+
+    public boolean saveFile(File file) {
+        return this.context.saveFile(file);
     }
 }

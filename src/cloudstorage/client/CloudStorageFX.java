@@ -5,6 +5,7 @@ import cloudstorage.shared.Folder;
 import cloudstorage.shared.IViewable;
 import javafx.application.Application;
 import javafx.application.Platform;
+import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
@@ -34,6 +35,8 @@ public class CloudStorageFX extends Application {
     private Client client;
 
     private final ListView<IViewable> files = new ListView<>();
+
+    private boolean editMode = false;
 
 
     @Override
@@ -190,6 +193,9 @@ public class CloudStorageFX extends Application {
                             btnCreateFolder.setDisable(false);
                             btnNewFile.setDisable(false);
                         }
+                    } else if (selectedItem instanceof File) {
+                        showFileUI((File) selectedItem);
+                        stage.close();
                     }
                     updateFileList();
                 }
@@ -288,12 +294,6 @@ public class CloudStorageFX extends Application {
         hor.setSpacing(10);
         vert.getChildren().add(hor);
 
-        Button btnEditFile = new Button("Edit File");
-        hor.getChildren().add(btnEditFile);
-
-        Button btnSaveFile = new Button("Save File");
-        hor.getChildren().add(btnSaveFile);
-
         Label lblEditMode = new Label("Edit mode: off");
         lblEditMode.setAlignment(Pos.BOTTOM_RIGHT);
         hor.getChildren().add(lblEditMode);
@@ -301,12 +301,40 @@ public class CloudStorageFX extends Application {
         TextArea text = new TextArea();
         text.setMaxWidth(480);
         text.setText(file.getText());
+        text.setDisable(true);
         vert.getChildren().add(text);
+
+        Button btnEditFile = new Button("Edit File");
+        btnEditFile.setOnAction(event -> {
+            if (client.requestEditFile(file)) {
+                editMode = true;
+                text.setDisable(false);
+                lblEditMode.setText("Edit mode: on");
+            }
+        });
+        hor.getChildren().add(btnEditFile);
+
+        Button btnSaveFile = new Button("Save File");
+        btnSaveFile.setOnAction(event -> {
+            String fileText = text.getText();
+            if (client.saveFile(file, fileText)) {
+                editMode = false;
+                text.setDisable(true);
+                lblEditMode.setText("Edit mode: off");
+            } else {
+                Alert alert = new Alert(Alert.AlertType.ERROR);
+                alert.setTitle("Error saving file");
+                alert.setHeaderText("You don't have the permission to save.");
+                alert.setContentText("First request to edit the file!");
+            }
+        });
+        hor.getChildren().add(btnSaveFile);
+
 
         stage.setOnCloseRequest(event -> showCloudStorageUI());
 
         Scene scene = new Scene(root, 480, 218);
-        stage.setTitle("File");
+        stage.setTitle("File - " + file.getName());
         stage.setScene(scene);
         stage.show();
     }

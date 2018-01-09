@@ -1,6 +1,7 @@
 package cloudstorage.client;
 
 import cloudstorage.shared.Account;
+import cloudstorage.shared.File;
 import cloudstorage.shared.Folder;
 import cloudstorage.shared.IStorage;
 import fontyspublisher.IRemotePropertyListener;
@@ -89,5 +90,27 @@ public class LocalStorage extends UnicastRemoteObject implements IRemoteProperty
             LOGGER.severe("LocalStorage: RemoteException when trying to subscribe to remote");
             LOGGER.severe("LocalStorage: RemoteException: " + e.getMessage());
         }
+    }
+
+    public boolean requestEditFile(File file) {
+        try {
+            return remoteStorage.lockFile(file, owner);
+        } catch (RemoteException e) {
+            LOGGER.severe("LocalStorage: RemoteException when trying to request edit file");
+            LOGGER.severe("LocalStorage: RemoteException: " + e.getMessage());
+        }
+
+        return false;
+    }
+
+    public boolean saveFile(File file, String fileText) {
+        try {
+            return remoteStorage.saveFile(file, fileText, owner);
+        } catch (RemoteException e) {
+            LOGGER.severe("LocalStorage: RemoteException when trying save file");
+            LOGGER.severe("LocalStorage: RemoteException: " + e.getMessage());
+        }
+
+        return false;
     }
 }

@@ -16,17 +16,10 @@ public class File implements IViewable, Serializable {
     private LocalDate createdAt;
     private LocalDate editedAt;
 
-    public File(int id, String name, Account owner, Folder location) {
-        this.id = id;
-        this.name = name;
-        this.owner = owner;
+    private boolean locked = false;
+    private int lockedById = -1;
 
-        this.location = location;
-
-        this.size = 0;
-        this.text = "";
-    }
-
+    //With content
     public File(int id, String name, int size, Folder location, Account owner, String text) {
         this.id = id;
         this.name = name;
@@ -36,24 +29,62 @@ public class File implements IViewable, Serializable {
         this.text = text;
     }
 
+    //without content
     public File(int id, String name, int size, Folder location, Account owner, String text, LocalDate createdAt, LocalDate editedAt) {
-        this(id, name, size, location, owner, text);
+        this.id = id;
+        this.name = name;
+        this.owner = owner;
+
+        this.location = location;
+
+        this.size = size;
+        this.text = text;
 
         this.createdAt = createdAt;
         this.editedAt = editedAt;
     }
 
-    @Override
+    public boolean lock(int accountId) {
+        if (lockedById == -1) {
+            lockedById = accountId;
+            locked = true;
+            return true;
+        }
+
+        return false;
+    }
+
+    public boolean unlock(int accountId) {
+        if (locked) {
+            if (lockedById == accountId) {
+                lockedById = -1;
+                locked = false;
+                return true;
+            }
+        }
+
+        return false;
+    }
+
     public String getName() {
         return name;
     }
 
     public void rename(String name) {
-
+        this.name = name;
     }
 
-    public void editContent() {
+    public boolean editText(Account a, String text) {
+        if (locked) {
+            if (lockedById == a.getId()) {
+                this.text = text;
+                editedAt = LocalDate.now();
+                unlock(a.getId());
+                return true;
+            }
+        }
 
+        return false;
     }
 
     public String getText() {
@@ -61,23 +92,23 @@ public class File implements IViewable, Serializable {
     }
 
     public Integer getId() {
-        return null;
+        return id;
     }
 
     public Account getOwner() {
-        return null;
+        return owner;
     }
 
-    public Date getCreatedAt() {
-        return null;
+    public LocalDate getCreatedAt() {
+        return createdAt;
     }
 
-    public Date getEditedAt() {
-        return null;
+    public LocalDate getEditedAt() {
+        return editedAt;
     }
 
     public Folder getLocation() {
-        return null;
+        return location;
     }
 
     @Override

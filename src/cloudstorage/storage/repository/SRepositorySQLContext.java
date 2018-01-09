@@ -177,4 +177,35 @@ public class SRepositorySQLContext implements ISRepositoryContext {
 
         return false;
     }
+
+    @Override
+    public boolean saveFile(File file) {
+        String SQL = "UPDATE files SET \"name\" = ?, filetext = ?, edited = ?, size = ? WHERE id = ?";
+
+        connector.openConnection();
+        try (PreparedStatement pStmt = connector.con.prepareStatement(SQL)) {
+            pStmt.setString(1, file.getName());
+            pStmt.setString(2, file.getText());
+            pStmt.setObject(3, file.getEditedAt());
+
+            int size = 0;
+            try {
+                size = file.getText().getBytes("UTF-16BE").length;
+            } catch (UnsupportedEncodingException e) {
+                LOGGER.severe("SQLContext: UnsupportedEncodingException when trying to get files size");
+                LOGGER.severe("SQLContext: UnsupportedEncodingException: " + e.getMessage());
+            }
+            pStmt.setInt(4, size);
+            pStmt.setInt(5, file.getId());
+
+            return pStmt.executeUpdate() > 0;
+        } catch (SQLException e) {
+            LOGGER.severe("SQLContext: SQLException when trying to add file");
+            LOGGER.severe("SQLContext: SQLException: " + e.getMessage());
+        } finally {
+            connector.closeConnection();
+        }
+
+        return false;
+    }
 }

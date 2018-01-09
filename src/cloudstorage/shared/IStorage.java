@@ -1,9 +1,6 @@
 package cloudstorage.shared;
 
-import cloudstorage.storage.IFileProvider;
 import fontyspublisher.IRemotePropertyListener;
-import fontyspublisher.RemotePublisher;
-
 import java.rmi.Remote;
 import java.rmi.RemoteException;
 
@@ -15,8 +12,19 @@ public interface IStorage extends Remote {
      */
     Folder getRoot() throws RemoteException;
 
+    /**
+     * Gets the id.
+     * @return the id.
+     * @throws RemoteException when RMI fails.
+     */
     int getId() throws RemoteException;
 
+    /**
+     * Gets the files folder, This is the "Your Storage" folder, in which
+     * you can create files.
+     * @return the files folder.
+     * @throws RemoteException when RMI fails.
+     */
     Folder getFiles() throws RemoteException;
 
     /**
@@ -60,29 +68,46 @@ public interface IStorage extends Remote {
     Account getOwner() throws RemoteException;
 
     /**
-     * Uploads a file to the storage.
-     * @param file the file.
-     * @param location the location of the file.
+     * Asks to lock a file, when you have a lock, you can edit the file.
+     * @param file the file you want to lock
+     * @param account your account.
      * @return success status.
      * @throws RemoteException when RMI fails.
      */
-    boolean upload(File file, Folder location) throws RemoteException;
-
-    /**
-     * Downloads a file from the storage.
-     * @param fileId the File's id.
-     * @return the File.
-     * @throws RemoteException when RMI fails.
-     */
-    File download(int fileId) throws RemoteException;
-
     boolean lockFile(File file, Account account) throws RemoteException;
 
+    /**
+     * Saves a file, but only if you have the lock for it.
+     * @param file the file you want to save.
+     * @param fileText the new content of the file.
+     * @param account your account.
+     * @return success status.
+     * @throws RemoteException when RMI fails.
+     */
     boolean saveFile(File file, String fileText, Account account) throws RemoteException;
 
+    /**
+     * Cancels the editing of a file, which effectively
+     * releases the lock of the file.
+     * @param file the file that you cancel the lock on.
+     * @param owner your account.
+     * @return success status.
+     * @throws RemoteException when RMI fails.
+     */
     boolean cancelEditFile(File file, Account owner) throws RemoteException;
 
+    /**
+     * Used to share a file with another storage.
+     * @param file the file to be shared.
+     * @param username the username of the account you want to share with.
+     * @return success status.
+     * @throws RemoteException when RMI fails.
+     */
     boolean shareFile(File file, String username) throws RemoteException;
 
+    /**
+     * Used to log out.
+     * @throws RemoteException when RMI fails.
+     */
     void logout() throws RemoteException;
 }

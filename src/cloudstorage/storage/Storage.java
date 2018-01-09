@@ -152,11 +152,6 @@ public class Storage extends UnicastRemoteObject implements IStorage, IFileProvi
     }
 
     @Override
-    public File download(int fileId) throws RemoteException {
-        throw new UnsupportedOperationException();
-    }
-
-    @Override
     public boolean lockFile(File file, Account account) {
         File realFile = root.getFile(file.getId());
 

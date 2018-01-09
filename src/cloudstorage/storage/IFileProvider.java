@@ -32,4 +32,6 @@ public interface IFileProvider extends Remote {
      * @throws RemoteException when RMI fails.
      */
     boolean saveFile(File file, String fileText, Account account) throws RemoteException;
+
+    void receiveSharedFile(File file) throws RemoteException;
 }

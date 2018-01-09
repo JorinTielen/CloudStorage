@@ -130,6 +130,8 @@ public class Storage extends UnicastRemoteObject implements IStorage, IFileProvi
         }
 
         boolean success = repository.addFile(name, parent, owner);
+        // Also update locally:
+        root = repository.getRoot(owner);
         try {
             publisher.inform("root", null, root);
         } catch (RemoteException e) {
@@ -184,6 +186,18 @@ public class Storage extends UnicastRemoteObject implements IStorage, IFileProvi
         return false;
     }
 
+    @Override
+    public void receiveSharedFile(File file) {
+        shared.getFiles().add(file);
+
+        try {
+            publisher.inform("root", null, root);
+        } catch (RemoteException e) {
+            LOGGER.severe("Storage: cannot receive shared file");
+            LOGGER.severe("Storage: RemoteException: " + e.getMessage());
+        }
+    }
+
     public boolean cancelEditFile(File file, Account owner) {
         File realFile = root.getFile(file.getId());
 
@@ -198,18 +212,28 @@ public class Storage extends UnicastRemoteObject implements IStorage, IFileProvi
     }
 
     @Override
-    public boolean shareFile(File file, String username) throws RemoteException {
+    public boolean shareFile(File file, String username) {
         File realFile = root.getFile(file.getId());
 
         //First save the share in the repository
         repository.shareFile(file, username);
 
         //Try to get the other storage (for push notification), only works if they are logged in.
-        /*
-        IFileProvider other = cloudStorage.getStorageReference(username);
+        IFileProvider other = null;
+        try {
+            other = cloudStorage.getStorageReference(username);
+        } catch (RemoteException e) {
+            LOGGER.severe("Storage: Cannot get StorageReference");
+            LOGGER.severe("Storage: RemoteException: " + e.getMessage());
+        }
         if (other != null) {
-            other.receiveSharedFile(file);
-        } */
+            try {
+                other.receiveSharedFile(file);
+            } catch (RemoteException e) {
+                LOGGER.severe("Storage: Cannot contact StorageReference");
+                LOGGER.severe("Storage: RemoteException: " + e.getMessage());
+            }
+        }
 
         try {
             publisher.inform("root", null, root);

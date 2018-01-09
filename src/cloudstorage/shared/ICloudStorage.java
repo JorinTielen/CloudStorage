@@ -1,5 +1,6 @@
 package cloudstorage.shared;
 
+import cloudstorage.storage.IFileProvider;
 import cloudstorage.storage.IStorageServer;
 import cloudstorage.storage.Storage;
 import cloudstorage.storage.StorageServer;
@@ -12,4 +13,7 @@ public interface ICloudStorage extends Remote {
     IStorage register(String username, String email, String password) throws RemoteException;
     boolean registerStorageServer(IStorageServer server) throws RemoteException;
     Account getAccountFromStorage(int id) throws RemoteException;
+    void logoutStorage(int id) throws RemoteException;
+    IFileProvider getStorageReference(String username) throws RemoteException;
+
 }

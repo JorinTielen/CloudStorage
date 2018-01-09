@@ -222,7 +222,7 @@ public class CloudStorageFX extends Application {
         Scene scene = new Scene(root, 350, 400);
 
         stage.setOnCloseRequest(t -> {
-            //client.logout();
+            client.logout();
             Platform.exit();
             System.exit(0);
         });

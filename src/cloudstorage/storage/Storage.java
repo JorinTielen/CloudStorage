@@ -206,7 +206,7 @@ public class Storage extends UnicastRemoteObject implements IStorage, IFileProvi
 
         //Try to get the other storage (for push notification), only works if they are logged in.
         /*
-        IFileProvider other = cloudStorage.getStorage(username);
+        IFileProvider other = cloudStorage.getStorageReference(username);
         if (other != null) {
             other.receiveSharedFile(file);
         } */
@@ -218,5 +218,15 @@ public class Storage extends UnicastRemoteObject implements IStorage, IFileProvi
             LOGGER.severe("Storage: RemoteException: " + e.getMessage());
         }
         return false;
+    }
+
+    @Override
+    public void logout() {
+        try {
+            cloudStorage.logoutStorage(id);
+        } catch (RemoteException e) {
+            LOGGER.severe("Storage: Cannot log out");
+            LOGGER.severe("Storage: RemoteException: " + e.getMessage());
+        }
     }
 }

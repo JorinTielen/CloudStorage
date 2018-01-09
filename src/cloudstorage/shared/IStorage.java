@@ -1,5 +1,6 @@
 package cloudstorage.shared;
 
+import cloudstorage.storage.IFileProvider;
 import fontyspublisher.IRemotePropertyListener;
 import fontyspublisher.RemotePublisher;
 
@@ -82,4 +83,6 @@ public interface IStorage extends Remote {
     boolean cancelEditFile(File file, Account owner) throws RemoteException;
 
     boolean shareFile(File file, String username) throws RemoteException;
+
+    void logout() throws RemoteException;
 }

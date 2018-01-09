@@ -146,4 +146,8 @@ public class Client {
     public boolean shareFile(File file, String username) {
         return localStorage.shareFile(file, username);
     }
+
+    public void logout() {
+        localStorage.logout();
+    }
 }

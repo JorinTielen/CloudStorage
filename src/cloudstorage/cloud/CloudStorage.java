@@ -6,6 +6,7 @@ import cloudstorage.cloud.repository.CSRepositorySQLContext;
 import cloudstorage.shared.Account;
 import cloudstorage.shared.ICloudStorage;
 import cloudstorage.shared.IStorage;
+import cloudstorage.storage.IFileProvider;
 import cloudstorage.storage.IStorageServer;
 import cloudstorage.storage.Storage;
 import cloudstorage.storage.StorageServer;
@@ -80,6 +81,21 @@ public class CloudStorage extends UnicastRemoteObject implements ICloudStorage {
         return repository.getAccountFromStorage(storage_id);
     }
 
+    @Override
+    public void logoutStorage(int id) {
+        for (IStorage s : storages) {
+            try {
+                if (s.getId() == id) {
+                    storages.remove(s);
+                    return;
+                }
+            } catch (RemoteException e) {
+                LOGGER.severe("CloudStorage: cannot log out");
+                LOGGER.severe("CloudStorage: RemoteException: " + e.getMessage());
+            }
+        }
+    }
+
     public IStorage register(String username, String email, String password) {
         if (repository.register(username, password, email)) {
             try {
@@ -105,6 +121,11 @@ public class CloudStorage extends UnicastRemoteObject implements ICloudStorage {
                 e.printStackTrace();
             }
         }
+    }
+
+    public IFileProvider getStorageReference(String username) {
+        //TODO
+        throw new UnsupportedOperationException();
     }
 
     private void startCloudStorage() {

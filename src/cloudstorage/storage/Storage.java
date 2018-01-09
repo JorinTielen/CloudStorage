@@ -196,4 +196,27 @@ public class Storage extends UnicastRemoteObject implements IStorage, IFileProvi
         }
         return succes;
     }
+
+    @Override
+    public boolean shareFile(File file, String username) throws RemoteException {
+        File realFile = root.getFile(file.getId());
+
+        //First save the share in the repository
+        repository.shareFile(file, username);
+
+        //Try to get the other storage (for push notification), only works if they are logged in.
+        /*
+        IFileProvider other = cloudStorage.getStorage(username);
+        if (other != null) {
+            other.receiveSharedFile(file);
+        } */
+
+        try {
+            publisher.inform("root", null, root);
+        } catch (RemoteException e) {
+            LOGGER.severe("Storage: Cannot lock file");
+            LOGGER.severe("Storage: RemoteException: " + e.getMessage());
+        }
+        return false;
+    }
 }

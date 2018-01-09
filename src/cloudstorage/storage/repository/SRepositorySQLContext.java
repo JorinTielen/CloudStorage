@@ -55,7 +55,44 @@ public class SRepositorySQLContext implements ISRepositoryContext {
             getFolderChildren(owner, root);
         }
 
+        //Now get the shared files
+        if (root != null) {
+            getSharedFiles(root.getFolder("Shared with You"), owner, root);
+        }
+
         return root;
+    }
+
+    private void getSharedFiles(Folder sharedFolder, Account owner, Folder root) {
+        String SQL = "SELECT f.id, f.\"name\", f.folder_id, f.owner_id, f.filetext, f.created, f.edited, f.size FROM files f JOIN shared_files sf ON f.id = sf.orig_file_id WHERE sf.shared_with_id = ?";
+
+        List<File> files = new ArrayList<>();
+
+        connector.openConnection();
+        try (PreparedStatement pStmt = connector.con.prepareStatement(SQL)) {
+            pStmt.setInt(1, owner.getId());
+            try (ResultSet results = pStmt.executeQuery()) {
+                while (results.next()) {
+                    files.add(new File(
+                            results.getInt("id"),
+                            results.getString("name"),
+                            results.getInt("size"),
+                            sharedFolder,
+                            owner,
+                            results.getString("filetext"),
+                            LocalDateTime.ofInstant(((Timestamp) results.getObject("created")).toInstant(), ZoneOffset.ofHours(0)).toLocalDate(),
+                            LocalDateTime.ofInstant(((Timestamp) results.getObject("edited")).toInstant(), ZoneOffset.ofHours(0)).toLocalDate()
+                    ));
+                }
+            }
+        } catch (SQLException e) {
+            LOGGER.severe("SQLContext: SQLException when trying to get shared files");
+            LOGGER.severe("SQLContext: SQLException: " + e.getMessage());
+        } finally {
+            connector.closeConnection();
+        }
+
+        sharedFolder.getFiles().addAll(files);
     }
 
     public void getFolderChildren(Account owner, Folder folder) {
@@ -125,14 +162,13 @@ public class SRepositorySQLContext implements ISRepositoryContext {
                             folder,
                             owner,
                             results.getString("filetext"),
-                            //Fucking beautiful
                             LocalDateTime.ofInstant(((Timestamp) results.getObject("created")).toInstant(), ZoneOffset.ofHours(0)).toLocalDate(),
                             LocalDateTime.ofInstant(((Timestamp) results.getObject("edited")).toInstant(), ZoneOffset.ofHours(0)).toLocalDate()
                     ));
                 }
             }
         } catch (SQLException e) {
-            LOGGER.severe("SQLContext: SQLException when trying to get folder children");
+            LOGGER.severe("SQLContext: SQLException when trying to get folder files");
             LOGGER.severe("SQLContext: SQLException: " + e.getMessage());
         } finally {
             connector.closeConnection();
@@ -204,6 +240,45 @@ public class SRepositorySQLContext implements ISRepositoryContext {
             LOGGER.severe("SQLContext: SQLException: " + e.getMessage());
         } finally {
             connector.closeConnection();
+        }
+
+        return false;
+    }
+
+    @Override
+    public boolean shareFile(File file, String username) {
+        String SQL = "INSERT INTO shared_files (orig_file_id, shared_with_id) VALUES (?, ?)";
+
+        //First, get the id of to share person
+        int accountid = -1;
+        connector.openConnection();
+        try (PreparedStatement pStmt = connector.con.prepareStatement("SELECT id FROM accounts WHERE username = ?")) {
+            pStmt.setString(1, username);
+            try (ResultSet results = pStmt.executeQuery()) {
+                while (results.next()) {
+                    accountid = results.getInt("id");
+                }
+            }
+        } catch (SQLException e) {
+            LOGGER.severe("SQLContext: SQLException when trying to add file");
+            LOGGER.severe("SQLContext: SQLException: " + e.getMessage());
+        } finally {
+            connector.closeConnection();
+        }
+
+        if (accountid != -1) {
+            connector.openConnection();
+            try (PreparedStatement pStmt = connector.con.prepareStatement(SQL)) {
+                pStmt.setInt(1, file.getId());
+                pStmt.setInt(2, accountid);
+
+                return pStmt.executeUpdate() > 0;
+            } catch (SQLException e) {
+                LOGGER.severe("SQLContext: SQLException when trying to add file");
+                LOGGER.severe("SQLContext: SQLException: " + e.getMessage());
+            } finally {
+                connector.closeConnection();
+            }
         }
 
         return false;

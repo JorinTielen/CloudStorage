@@ -194,9 +194,12 @@ public class CloudStorageFX extends Application {
                         if (selectedItem.getName().equals("Shared with You")) {
                             btnCreateFolder.setDisable(true);
                             btnNewFile.setDisable(true);
+                            btnShareFile.setDisable(true);
                         } else {
                             btnCreateFolder.setDisable(false);
                             btnNewFile.setDisable(false);
+                            btnShareFile.setDisable(false);
+
                         }
                     } else if (selectedItem instanceof File) {
                         showFileUI((File) selectedItem);
@@ -217,6 +220,12 @@ public class CloudStorageFX extends Application {
         fileSelection.getChildren().add(files);
 
         Scene scene = new Scene(root, 350, 400);
+
+        stage.setOnCloseRequest(t -> {
+            //client.logout();
+            Platform.exit();
+            System.exit(0);
+        });
 
         stage.setTitle("CloudStorage - GSO3");
         stage.setScene(scene);

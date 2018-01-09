@@ -10,4 +10,5 @@ public interface ISRepositoryContext {
     boolean addFolder(Account owner, String name, Folder parent);
     boolean addFile(String name, Folder parent, Account owner);
     boolean saveFile(File file);
+    boolean shareFile(File file, String username);
 }

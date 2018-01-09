@@ -124,4 +124,15 @@ public class LocalStorage extends UnicastRemoteObject implements IRemoteProperty
 
         return false;
     }
+
+    public boolean shareFile(File file, String username) {
+        try {
+            return remoteStorage.shareFile(file, username);
+        } catch (RemoteException e) {
+            LOGGER.severe("LocalStorage: RemoteException when trying to share file");
+            LOGGER.severe("LocalStorage: RemoteException: " + e.getMessage());
+        }
+
+        return false;
+    }
 }

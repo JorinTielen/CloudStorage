@@ -30,4 +30,8 @@ public class SRepository {
     public boolean saveFile(File file) {
         return this.context.saveFile(file);
     }
+
+    public boolean shareFile(File file, String username) {
+        return this.context.shareFile(file, username);
+    }
 }

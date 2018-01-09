@@ -80,4 +80,6 @@ public interface IStorage extends Remote {
     boolean saveFile(File file, String fileText, Account account) throws RemoteException;
 
     boolean cancelEditFile(File file, Account owner) throws RemoteException;
+
+    boolean shareFile(File file, String username) throws RemoteException;
 }

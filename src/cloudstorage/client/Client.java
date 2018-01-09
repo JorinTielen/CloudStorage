@@ -143,7 +143,7 @@ public class Client {
         localStorage.cancelEditFile(file);
     }
 
-    public void shareFile(File selectedItem, String s) {
-        //TODO
+    public boolean shareFile(File file, String username) {
+        return localStorage.shareFile(file, username);
     }
 }

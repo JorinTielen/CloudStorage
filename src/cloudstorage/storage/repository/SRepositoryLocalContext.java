@@ -48,6 +48,11 @@ public class SRepositoryLocalContext implements ISRepositoryContext {
         return false;
     }
 
+    @Override
+    public boolean shareFile(File file, String username) {
+        return false;
+    }
+
     private boolean addFolder(Folder root, Folder parent, String name) {
         for (Folder f : root.getChildren()) {
             if (f.getId() == parent.getId()) {

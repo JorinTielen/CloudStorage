@@ -132,6 +132,7 @@ public class CSRepositorySQLContext implements ICSRepositoryContext {
         } catch (SQLException e) {
             LOGGER.severe("SQLContext: SQLException when trying to register");
             LOGGER.severe("SQLContext: SQLException: " + e.getMessage());
+            return false;
         } finally {
             connector.closeConnection();
         }

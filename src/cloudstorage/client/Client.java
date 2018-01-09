@@ -23,7 +23,7 @@ public class Client {
 
     Client(CloudStorageFX ui) {
         this.ui = ui;
-        connectToCloudStorage("192.168.0.20");
+        connectToCloudStorage("145.93.164.5");
     }
 
     Client() {

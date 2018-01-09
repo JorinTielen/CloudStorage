@@ -5,6 +5,7 @@ import cloudstorage.shared.Folder;
 import cloudstorage.shared.IViewable;
 import javafx.application.Application;
 import javafx.application.Platform;
+import javafx.event.EventHandler;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.Group;
@@ -17,6 +18,7 @@ import javafx.scene.text.Font;
 import javafx.scene.text.FontWeight;
 import javafx.scene.text.Text;
 import javafx.stage.Stage;
+import javafx.stage.WindowEvent;
 import javafx.util.Pair;
 
 import java.util.ArrayList;
@@ -249,7 +251,18 @@ public class CloudStorageFX extends Application {
             String password = pfPassword.getText();
             String email = txtEmail.getText();
             if (username.length() >= 4 && password.length() >= 6 && email.length() >= 6) {
-                client.register(username, password, email);
+                if (client.register(username, password, email)) {
+                    showCloudStorageUI();
+                    stage.close();
+                } else {
+                    Alert alert = new Alert(Alert.AlertType.ERROR);
+                    alert.setTitle("Error registering");
+                    alert.setHeaderText("Something went wrong with registration");
+                    alert.setContentText("This username or email already exists.");
+
+                    alert.showAndWait();
+                }
+
             }
         });
         btnRegister.setDefaultButton(true);
@@ -289,6 +302,8 @@ public class CloudStorageFX extends Application {
         text.setMaxWidth(480);
         text.setText(file.getText());
         vert.getChildren().add(text);
+
+        stage.setOnCloseRequest(event -> showCloudStorageUI());
 
         Scene scene = new Scene(root, 480, 218);
         stage.setTitle("File");

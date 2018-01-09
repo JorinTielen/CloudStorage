@@ -326,12 +326,33 @@ public class CloudStorageFX extends Application {
                 alert.setTitle("Error saving file");
                 alert.setHeaderText("You don't have the permission to save.");
                 alert.setContentText("First request to edit the file!");
+
+                alert.showAndWait();
             }
         });
         hor.getChildren().add(btnSaveFile);
 
+        Platform.setImplicitExit(false);
+        stage.setOnCloseRequest(event -> {
+            if (editMode) {
+                Alert alert = new Alert(Alert.AlertType.WARNING);
+                alert.setTitle("You have not saved yet.");
+                alert.setHeaderText("Closing this window will lose all your work.");
+                alert.setContentText("Are you sure?");
+                alert.getButtonTypes().add(ButtonType.CANCEL);
 
-        stage.setOnCloseRequest(event -> showCloudStorageUI());
+                alert.showAndWait().ifPresent(response -> {
+                    if (response == ButtonType.OK) {
+                        client.cancelEditFile(file);
+                        showCloudStorageUI();
+                    } else {
+                        event.consume();
+                    }
+                });
+            } else {
+                showCloudStorageUI();
+            }
+        });
 
         Scene scene = new Scene(root, 480, 218);
         stage.setTitle("File - " + file.getName());

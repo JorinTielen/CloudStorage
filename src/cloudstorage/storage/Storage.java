@@ -183,4 +183,17 @@ public class Storage extends UnicastRemoteObject implements IStorage, IFileProvi
 
         return false;
     }
+
+    public boolean cancelEditFile(File file, Account owner) {
+        File realFile = root.getFile(file.getId());
+
+        boolean succes =  realFile.unlock(owner.getId());
+        try {
+            publisher.inform("root", null, root);
+        } catch (RemoteException e) {
+            LOGGER.severe("Storage: Cannot lock file");
+            LOGGER.severe("Storage: RemoteException: " + e.getMessage());
+        }
+        return succes;
+    }
 }

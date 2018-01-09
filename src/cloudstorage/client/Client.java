@@ -141,4 +141,8 @@ public class Client {
     public boolean saveFile(File file, String fileText) {
         return localStorage.saveFile(file, fileText);
     }
+
+    public void cancelEditFile(File file) {
+        localStorage.cancelEditFile(file);
+    }
 }

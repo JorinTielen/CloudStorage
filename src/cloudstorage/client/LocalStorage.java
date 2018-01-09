@@ -113,4 +113,15 @@ public class LocalStorage extends UnicastRemoteObject implements IRemoteProperty
 
         return false;
     }
+
+    public boolean cancelEditFile(File file) {
+        try {
+            return remoteStorage.cancelEditFile(file, owner);
+        } catch (RemoteException e) {
+            LOGGER.severe("LocalStorage: RemoteException when trying to request edit file");
+            LOGGER.severe("LocalStorage: RemoteException: " + e.getMessage());
+        }
+
+        return false;
+    }
 }

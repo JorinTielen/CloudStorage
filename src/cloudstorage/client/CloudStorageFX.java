@@ -151,15 +151,20 @@ public class CloudStorageFX extends Application {
         });
         buttons.getChildren().add(btnNewFile);
 
-        Button btnOpenFile = new Button("Open File");
-        btnOpenFile.setOnAction(event -> {
+        Button btnShareFile = new Button("Share File");
+        btnShareFile.setOnAction(event -> {
             IViewable selectedItem = files.getSelectionModel().getSelectedItem();
             if (selectedItem instanceof File) {
-                showFileUI((File) selectedItem);
-                stage.close();
+                TextInputDialog dialog = new TextInputDialog("Share File");
+                dialog.setTitle("Share File");
+                dialog.setHeaderText("With who do you want to share?");
+                dialog.setContentText("Please0 enter their username:");
+                Optional<String> result = dialog.showAndWait();
+
+                result.ifPresent(name -> client.shareFile((File) selectedItem, result.get()));
             }
         });
-        buttons.getChildren().add(btnOpenFile);
+        buttons.getChildren().add(btnShareFile);
 
         Button btnCreateFolder = new Button("Create Folder");
         btnCreateFolder.setOnAction(event -> {

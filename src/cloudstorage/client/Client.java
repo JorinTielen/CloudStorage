@@ -1,9 +1,6 @@
 package cloudstorage.client;
 
-import cloudstorage.shared.File;
-import cloudstorage.shared.Folder;
-import cloudstorage.shared.ICloudStorage;
-import cloudstorage.shared.IStorage;
+import cloudstorage.shared.*;
 import cloudstorage.storage.Storage;
 
 import java.rmi.NotBoundException;
@@ -144,5 +141,9 @@ public class Client {
 
     public void cancelEditFile(File file) {
         localStorage.cancelEditFile(file);
+    }
+
+    public void shareFile(File selectedItem, String s) {
+        //TODO
     }
 }

@@ -147,38 +147,81 @@ public class Storage extends UnicastRemoteObject implements IStorage, IFileProvi
     }
 
     @Override
-    public boolean upload(File file, Folder location) throws RemoteException {
-        throw new UnsupportedOperationException();
-    }
-
-    @Override
     public boolean lockFile(File file, Account account) {
         File realFile = root.getFile(file.getId());
+        IFileProvider fileProvider;
 
-        boolean succes =  realFile.lock(account.getId());
+        boolean success = false;
+
+        //If the file is not yours go to the owner's storage.
+        if(file.getOwner().getId() != this.owner.getId()) {
+            try {
+                fileProvider = cloudStorage.getStorageReference(file.getOwner().getName());
+            } catch (RemoteException e) {
+                LOGGER.severe("Storage: Cannot get storage reference");
+                LOGGER.severe("Storage: RemoteException: " + e.getMessage());
+                fileProvider = null;
+            }
+
+            if (fileProvider != null) {
+                try {
+                    success = fileProvider.lockFile(file, account);
+                } catch (RemoteException e) {
+                    LOGGER.severe("Storage: Cannot get lock file remotely");
+                    LOGGER.severe("Storage: RemoteException: " + e.getMessage());
+                }
+            }
+        } else {
+            success = realFile.lock(account.getId());
+        }
+
         try {
             publisher.inform("root", null, root);
         } catch (RemoteException e) {
             LOGGER.severe("Storage: Cannot lock file");
             LOGGER.severe("Storage: RemoteException: " + e.getMessage());
         }
-        return succes;
+        return success;
     }
 
     @Override
     public boolean saveFile(File file, String fileText, Account account) {
         File realFile = root.getFile(file.getId());
-        if (realFile.editText(account, fileText)) {
+        IFileProvider fileProvider;
+
+        boolean success = false;
+
+        //If the file is not yours go to the owner's storage.
+        if(file.getOwner().getId() != this.owner.getId()) {
             try {
-                publisher.inform("root", null, root);
+                fileProvider = cloudStorage.getStorageReference(file.getOwner().getName());
             } catch (RemoteException e) {
-                LOGGER.severe("Storage: Cannot save file");
+                LOGGER.severe("Storage: Cannot get storage reference when saving file");
                 LOGGER.severe("Storage: RemoteException: " + e.getMessage());
+                fileProvider = null;
             }
-            return repository.saveFile(realFile);
+
+            if (fileProvider != null) {
+                try {
+                    success = fileProvider.saveFile(file, fileText, account);
+                } catch (RemoteException e) {
+                    LOGGER.severe("Storage: Cannot save file remotely");
+                    LOGGER.severe("Storage: RemoteException: " + e.getMessage());
+                }
+            }
+        } else {
+            if (realFile.editText(account, fileText)) {
+                try {
+                    publisher.inform("root", null, root);
+                } catch (RemoteException e) {
+                    LOGGER.severe("Storage: Cannot save file");
+                    LOGGER.severe("Storage: RemoteException: " + e.getMessage());
+                }
+                success = repository.saveFile(realFile);
+            }
         }
 
-        return false;
+        return success;
     }
 
     @Override

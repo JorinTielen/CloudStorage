@@ -5,7 +5,6 @@ import cloudstorage.database.SQLConnector;
 import cloudstorage.shared.Account;
 import cloudstorage.shared.File;
 import cloudstorage.shared.Folder;
-
 import java.io.UnsupportedEncodingException;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -15,7 +14,6 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.ZoneOffset;
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.List;
 import java.util.logging.Logger;
 
@@ -90,6 +88,28 @@ public class SRepositorySQLContext implements ISRepositoryContext {
             LOGGER.severe("SQLContext: SQLException: " + e.getMessage());
         } finally {
             connector.closeConnection();
+        }
+
+        //get the correct owners
+        for (File f : files) {
+            connector.openConnection();
+            try (PreparedStatement pStmt = connector.con.prepareStatement("SELECT a.id, a.username, a.email FROM accounts a JOIN files f ON a.id = f.owner_id WHERE f.id = ?")) {
+                pStmt.setInt(1, f.getId());
+                try (ResultSet results = pStmt.executeQuery()) {
+                    while (results.next()) {
+                        f.setOwner(new Account(
+                                results.getInt("id"),
+                                results.getString("username"),
+                                results.getString("email")
+                        ));
+                    }
+                }
+            } catch (SQLException e) {
+                LOGGER.severe("SQLContext: SQLException when trying to get shared files");
+                LOGGER.severe("SQLContext: SQLException: " + e.getMessage());
+            } finally {
+                connector.closeConnection();
+            }
         }
 
         sharedFolder.getFiles().addAll(files);
@@ -249,14 +269,14 @@ public class SRepositorySQLContext implements ISRepositoryContext {
     public boolean shareFile(File file, String username) {
         String SQL = "INSERT INTO shared_files (orig_file_id, shared_with_id) VALUES (?, ?)";
 
-        //First, get the id of to share person
-        int accountid = -1;
+        //First, get the id of the person you want to share with
+        int accountId = -1;
         connector.openConnection();
         try (PreparedStatement pStmt = connector.con.prepareStatement("SELECT id FROM accounts WHERE username = ?")) {
             pStmt.setString(1, username);
             try (ResultSet results = pStmt.executeQuery()) {
                 while (results.next()) {
-                    accountid = results.getInt("id");
+                    accountId = results.getInt("id");
                 }
             }
         } catch (SQLException e) {
@@ -266,11 +286,12 @@ public class SRepositorySQLContext implements ISRepositoryContext {
             connector.closeConnection();
         }
 
-        if (accountid != -1) {
+        //Now, share with him, but only if you haven't shared with this person before.
+        if (accountId != -1) {
             connector.openConnection();
             try (PreparedStatement pStmt = connector.con.prepareStatement(SQL)) {
                 pStmt.setInt(1, file.getId());
-                pStmt.setInt(2, accountid);
+                pStmt.setInt(2, accountId);
 
                 return pStmt.executeUpdate() > 0;
             } catch (SQLException e) {

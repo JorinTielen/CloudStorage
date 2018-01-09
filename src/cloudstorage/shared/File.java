@@ -115,4 +115,8 @@ public class File implements IViewable, Serializable {
     public String toString() {
         return name;
     }
+
+    public void setOwner(Account owner) {
+        this.owner = owner;
+    }
 }

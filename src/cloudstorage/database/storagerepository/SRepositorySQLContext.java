@@ -1,6 +1,6 @@
-package cloudstorage.storage.repository;
+package cloudstorage.database.storagerepository;
 
-import cloudstorage.cloud.repository.CSRepositorySQLContext;
+import cloudstorage.database.cloudrepository.CSRepositorySQLContext;
 import cloudstorage.database.SQLConnector;
 import cloudstorage.shared.Account;
 import cloudstorage.shared.File;

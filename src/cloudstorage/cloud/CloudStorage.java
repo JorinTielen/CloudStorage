@@ -1,16 +1,14 @@
 package cloudstorage.cloud;
 
-import cloudstorage.cloud.repository.CSRepository;
-import cloudstorage.cloud.repository.CSRepositoryLocalContext;
-import cloudstorage.cloud.repository.CSRepositorySQLContext;
+import cloudstorage.database.cloudrepository.CSRepository;
+import cloudstorage.database.cloudrepository.CSRepositoryLocalContext;
+import cloudstorage.database.cloudrepository.CSRepositorySQLContext;
 import cloudstorage.shared.Account;
 import cloudstorage.shared.ICloudStorage;
 import cloudstorage.shared.IStorage;
 import cloudstorage.storage.IFileProvider;
 import cloudstorage.storage.IStorageServer;
 import cloudstorage.storage.Storage;
-import cloudstorage.storage.StorageServer;
-import cloudstorage.storage.repository.SRepositorySQLContext;
 
 import java.net.InetAddress;
 import java.rmi.RemoteException;
@@ -126,6 +124,11 @@ public class CloudStorage extends UnicastRemoteObject implements ICloudStorage {
                 Account a = repository.getAccount(username);
                 Storage s = new Storage(a, this, repository.getStorageId(a.getId()), localTest);
                 storages.add(s);
+
+                int id = generateRandomId();
+                sessions.put(id, username);
+                s.setSessionid(id);
+
                 return s;
             } catch (RemoteException e) {
                 LOGGER.severe("CloudStorage: Cannot register");

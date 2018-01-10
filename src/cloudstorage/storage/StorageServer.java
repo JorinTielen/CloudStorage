@@ -1,13 +1,10 @@
 package cloudstorage.storage;
 
-import cloudstorage.cloud.CloudStorage;
 import cloudstorage.shared.Account;
 import cloudstorage.shared.ICloudStorage;
 import cloudstorage.shared.IStorage;
-import cloudstorage.storage.repository.SRepositorySQLContext;
 
 import java.rmi.NotBoundException;
-import java.rmi.Remote;
 import java.rmi.RemoteException;
 import java.rmi.registry.LocateRegistry;
 import java.rmi.registry.Registry;
@@ -23,8 +20,8 @@ public class StorageServer extends UnicastRemoteObject implements IStorageServer
 
     private Storage storage;
 
-    private StorageServer() throws RemoteException {
-        connectToCloudStorage();
+    public StorageServer(String ip) throws RemoteException {
+        connectToCloudStorage(ip);
         waiting = true;
     }
 
@@ -45,18 +42,17 @@ public class StorageServer extends UnicastRemoteObject implements IStorageServer
 
     public static void main(String[] args) {
         try {
-            new StorageServer();
+            // Get ip address of server
+            Scanner input = new Scanner(System.in);
+            System.out.print("StorageServer: Enter IP address of CloudStorage: ");
+            String ip = input.nextLine();
+            new StorageServer(ip);
         } catch (RemoteException e) {
             e.printStackTrace();
         }
     }
 
-    private void connectToCloudStorage() {
-        // Get ip address of server
-        Scanner input = new Scanner(System.in);
-        System.out.print("StorageServer: Enter IP address of CloudStorage: ");
-        String ip = input.nextLine();
-
+    private void connectToCloudStorage(String ip) {
         int port = 1099;
 
         LOGGER.info("StorageServer: IP Address: " + ip);

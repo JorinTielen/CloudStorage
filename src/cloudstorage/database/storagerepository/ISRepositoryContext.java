@@ -1,4 +1,4 @@
-package cloudstorage.storage.repository;
+package cloudstorage.database.storagerepository;
 
 import cloudstorage.shared.Account;
 import cloudstorage.shared.File;

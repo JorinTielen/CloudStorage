@@ -1,11 +1,9 @@
 package cloudstorage.storage;
 
-import cloudstorage.cloud.CloudStorage;
 import cloudstorage.shared.*;
-import cloudstorage.storage.repository.ISRepositoryContext;
-import cloudstorage.storage.repository.SRepository;
-import cloudstorage.storage.repository.SRepositoryLocalContext;
-import cloudstorage.storage.repository.SRepositorySQLContext;
+import cloudstorage.database.storagerepository.SRepository;
+import cloudstorage.database.storagerepository.SRepositoryLocalContext;
+import cloudstorage.database.storagerepository.SRepositorySQLContext;
 import fontyspublisher.IRemotePropertyListener;
 import fontyspublisher.RemotePublisher;
 
@@ -277,7 +275,7 @@ public class Storage extends UnicastRemoteObject implements IStorage, IFileProvi
     public boolean shareFile(File file, String username) {
         File realFile = root.getFile(file.getId());
 
-        //First save the share in the repository
+        //First save the share in the cloudrepository
         repository.shareFile(file, username);
 
         //Try to get the other storage (for push notification), only works if they are logged in.

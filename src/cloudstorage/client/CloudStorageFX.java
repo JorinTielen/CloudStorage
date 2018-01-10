@@ -326,6 +326,13 @@ public class CloudStorageFX extends Application {
                     alert.showAndWait();
                 }
 
+            } else {
+                Alert alert = new Alert(Alert.AlertType.ERROR);
+                alert.setTitle("Error registering");
+                alert.setHeaderText("Invalid username/password");
+                alert.setContentText("Your username must be 4 characters long. Your password must be 6.");
+
+                alert.showAndWait();
             }
         });
         btnRegister.setDefaultButton(true);

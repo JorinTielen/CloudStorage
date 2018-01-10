@@ -1,4 +1,4 @@
-package cloudstorage.cloud.repository;
+package cloudstorage.database.cloudrepository;
 
 import cloudstorage.shared.Account;
 import cloudstorage.storage.Storage;
@@ -51,6 +51,12 @@ public class CSRepositoryLocalContext implements ICSRepositoryContext {
 
     @Override
     public Account getAccountFromStorage(int id) {
-        throw new UnsupportedOperationException();
+        for(Storage s : storages) {
+            if (s.getId() == id) {
+                return s.getOwner();
+            }
+        }
+
+        return null;
     }
 }

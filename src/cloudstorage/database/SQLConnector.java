@@ -1,6 +1,6 @@
 package cloudstorage.database;
 
-import cloudstorage.cloud.repository.CSRepositorySQLContext;
+import cloudstorage.database.cloudrepository.CSRepositorySQLContext;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;

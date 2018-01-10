@@ -4,6 +4,8 @@ import cloudstorage.shared.IStorage;
 import cloudstorage.storage.StorageServer;
 import org.junit.jupiter.api.Test;
 
+import java.net.InetAddress;
+import java.net.UnknownHostException;
 import java.rmi.RemoteException;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -42,5 +44,41 @@ class CloudStorageTest {
         } catch (RemoteException e) {
             fail("could not get owner: " + e.getMessage());
         }
+    }
+
+    /*@Test
+    void registerStorageServer() {
+        StorageServer server;
+        try {
+            InetAddress localhost = InetAddress.getLocalHost();
+            server = new StorageServer(localhost.getHostAddress());
+            assertEquals(true, cloudstorage.registerStorageServer(server));
+        } catch (RemoteException | UnknownHostException e) {
+            e.printStackTrace();
+        }
+    }*/
+
+    /*@Test
+    void getAccountFromStorage() {
+        IStorage storage = cloudstorage.register("henk", "asdf@mail", "asdf");
+
+        assertNotEquals(null, storage);
+        try {
+            assertEquals("henk", cloudstorage.getAccountFromStorage(storage.getId()).getName());
+        } catch (RemoteException e) {
+            fail("could not get owner: " + e.getMessage());
+        }
+    }*/
+
+    @Test
+    void logoutStorage() {
+    }
+
+    @Test
+    void getStorageReference() {
+    }
+
+    @Test
+    void logout() {
     }
 }

@@ -59,7 +59,7 @@ public class CloudStorageFX extends Application {
             }
 
             //Are you viewing a file?
-            if (viewingFile) {
+            if (viewingFile && !pushedNotification) {
                 if (filechanged(openFile, openFolder.getFiles())) {
                     pushedNotification = true;
                     Alert alert = new Alert(Alert.AlertType.INFORMATION);

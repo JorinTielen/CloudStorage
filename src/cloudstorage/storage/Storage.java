@@ -132,6 +132,7 @@ public class Storage extends UnicastRemoteObject implements IStorage, IFileProvi
         }
 
         boolean success = repository.addFile(name, parent, owner);
+
         // Also update locally:
         root = repository.getRoot(owner);
         try {
@@ -153,8 +154,6 @@ public class Storage extends UnicastRemoteObject implements IStorage, IFileProvi
         File realFile = root.getFile(file.getId());
         IFileProvider fileProvider;
 
-        boolean success = false;
-
         //If the file is not yours go to the owner's storage.
         if(file.getOwner().getId() != this.owner.getId()) {
             try {
@@ -165,17 +164,19 @@ public class Storage extends UnicastRemoteObject implements IStorage, IFileProvi
                 fileProvider = null;
             }
 
+            //The remote storage is online, so let's go there.
             if (fileProvider != null) {
                 try {
-                    success = fileProvider.lockFile(file, account);
+                    return fileProvider.lockFile(file, account);
                 } catch (RemoteException e) {
                     LOGGER.severe("Storage: Cannot get lock file remotely");
                     LOGGER.severe("Storage: RemoteException: " + e.getMessage());
                 }
             }
-        } else {
-            success = realFile.lock(account.getId());
         }
+
+        //The remote storage wasn't online, so let's lock it here.
+        boolean success = realFile.lock(account.getId());
 
         try {
             publisher.inform("root", null, root);
@@ -183,6 +184,7 @@ public class Storage extends UnicastRemoteObject implements IStorage, IFileProvi
             LOGGER.severe("Storage: Cannot lock file");
             LOGGER.severe("Storage: RemoteException: " + e.getMessage());
         }
+
         return success;
     }
 
@@ -190,8 +192,6 @@ public class Storage extends UnicastRemoteObject implements IStorage, IFileProvi
     public boolean saveFile(File file, String fileText, Account account) {
         File realFile = root.getFile(file.getId());
         IFileProvider fileProvider;
-
-        boolean success = false;
 
         //If the file is not yours go to the owner's storage.
         if(file.getOwner().getId() != this.owner.getId()) {
@@ -203,24 +203,31 @@ public class Storage extends UnicastRemoteObject implements IStorage, IFileProvi
                 fileProvider = null;
             }
 
+            //The remote storage is online, so let's go there.
             if (fileProvider != null) {
                 try {
-                    success = fileProvider.saveFile(file, fileText, account);
+                    return fileProvider.saveFile(file, fileText, account);
                 } catch (RemoteException e) {
                     LOGGER.severe("Storage: Cannot save file remotely");
                     LOGGER.severe("Storage: RemoteException: " + e.getMessage());
                 }
             }
+        }
+
+        boolean success;
+
+        //The remoteStorage wasn't online, so we will edit it here.
+        if (realFile.editText(account, fileText)) {
+             success = repository.saveFile(realFile);
         } else {
-            if (realFile.editText(account, fileText)) {
-                try {
-                    publisher.inform("root", null, root);
-                } catch (RemoteException e) {
-                    LOGGER.severe("Storage: Cannot save file");
-                    LOGGER.severe("Storage: RemoteException: " + e.getMessage());
-                }
-                success = repository.saveFile(realFile);
-            }
+            success = false;
+        }
+
+        try {
+            publisher.inform("root", null, root);
+        } catch (RemoteException e) {
+            LOGGER.severe("Storage: Cannot save file");
+            LOGGER.severe("Storage: RemoteException: " + e.getMessage());
         }
 
         return success;
@@ -239,6 +246,8 @@ public class Storage extends UnicastRemoteObject implements IStorage, IFileProvi
     }
 
     public boolean cancelEditFile(File file, Account owner) {
+
+        //TODO fix
         File realFile = root.getFile(file.getId());
 
         boolean succes =  realFile.unlock(owner.getId());
@@ -266,6 +275,7 @@ public class Storage extends UnicastRemoteObject implements IStorage, IFileProvi
             LOGGER.severe("Storage: Cannot get StorageReference");
             LOGGER.severe("Storage: RemoteException: " + e.getMessage());
         }
+
         if (other != null) {
             try {
                 other.receiveSharedFile(file);
@@ -275,12 +285,14 @@ public class Storage extends UnicastRemoteObject implements IStorage, IFileProvi
             }
         }
 
+        //inform client
         try {
             publisher.inform("root", null, root);
         } catch (RemoteException e) {
             LOGGER.severe("Storage: Cannot lock file");
             LOGGER.severe("Storage: RemoteException: " + e.getMessage());
         }
+
         return false;
     }
 

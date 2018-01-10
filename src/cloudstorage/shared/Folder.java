@@ -109,7 +109,8 @@ public class Folder implements IViewable, Serializable {
 
         for (Folder f : children) {
             File file = f.getFile(id);
-            if (file != null) {                return file;
+            if (file != null) {
+                return file;
             }
         }
 

@@ -110,4 +110,8 @@ public interface IStorage extends Remote {
      * @throws RemoteException when RMI fails.
      */
     void logout() throws RemoteException;
+
+    void setSessionid(int sessionid) throws RemoteException;
+
+    int getSessionid() throws RemoteException;
 }

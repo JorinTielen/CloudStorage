@@ -33,6 +33,7 @@ public class Client {
             try {
                 IStorage remoteStorage = cloudStorage.login(username, password);
                 if (remoteStorage != null) {
+                    session = remoteStorage.getSessionid();
                     localStorage = new LocalStorage(remoteStorage, this);
                     LOGGER.info("Client: Login successful");
                     return true;
@@ -54,6 +55,7 @@ public class Client {
             try {
                 IStorage remoteStorage = cloudStorage.register(username, email, password);
                 if (remoteStorage != null) {
+                    session = remoteStorage.getSessionid();
                     localStorage = new LocalStorage(remoteStorage, this);
                     LOGGER.info("Client: Register successful");
                     return true;
@@ -148,6 +150,12 @@ public class Client {
     }
 
     public void logout() {
+        try {
+            cloudStorage.logout(session);
+        } catch (RemoteException e) {
+            LOGGER.severe("Client: RemoteException when trying to log out");
+            LOGGER.severe("Client: RemoteException: " + e.getMessage());
+        }
         localStorage.logout();
     }
 }

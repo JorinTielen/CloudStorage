@@ -19,7 +19,9 @@ import java.rmi.registry.LocateRegistry;
 import java.rmi.registry.Registry;
 import java.rmi.server.UnicastRemoteObject;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Random;
 import java.util.logging.Logger;
 
 public class CloudStorage extends UnicastRemoteObject implements ICloudStorage {
@@ -29,6 +31,8 @@ public class CloudStorage extends UnicastRemoteObject implements ICloudStorage {
     private static final String BINDING_NAME = "CloudStorage";
 
     private CSRepository repository;
+
+    private HashMap<Integer, String> sessions = new HashMap<>();
 
     private List<IStorage> storages = new ArrayList<>();
     private List<IStorageServer> waitingServers = new ArrayList<>();
@@ -45,6 +49,11 @@ public class CloudStorage extends UnicastRemoteObject implements ICloudStorage {
     }
 
     public IStorage login(String username, String password) {
+        //Check if you are already logged in
+        if (sessions.containsValue(username)) {
+            return null;
+        }
+
         if (repository.login(username, password)) {
             try {
                 Account a = repository.getAccount(username);
@@ -60,6 +69,10 @@ public class CloudStorage extends UnicastRemoteObject implements ICloudStorage {
                 }
 
                 storages.add(s);
+
+                int id = generateRandomId();
+                sessions.put(id, username);
+                s.setSessionid(id);
                 return s;
             } catch (RemoteException e) {
                 LOGGER.severe("CloudStorage: Cannot login");
@@ -67,6 +80,17 @@ public class CloudStorage extends UnicastRemoteObject implements ICloudStorage {
             }
         }
         return null;
+    }
+
+    private int generateRandomId() {
+        Random rnd = new Random();
+        int id;
+
+        do {
+            id = rnd.nextInt();
+        } while (sessions.containsKey(id));
+
+        return id;
     }
 
     @Override
@@ -111,18 +135,6 @@ public class CloudStorage extends UnicastRemoteObject implements ICloudStorage {
         return null;
     }
 
-    public void logout(int session) {
-        for (IStorage s : storages) {
-            try {
-                if (session == s.getId()) {
-                    storages.remove(s);
-                }
-            } catch (RemoteException e) {
-                e.printStackTrace();
-            }
-        }
-    }
-
     public IFileProvider getStorageReference(String username) {
         for (IStorage s : storages) {
             try {
@@ -136,6 +148,13 @@ public class CloudStorage extends UnicastRemoteObject implements ICloudStorage {
         }
 
         return null;
+    }
+
+    @Override
+    public void logout(Integer session) {
+        if (sessions.containsKey(session)) {
+            sessions.remove(session);
+        }
     }
 
     private void startCloudStorage() {

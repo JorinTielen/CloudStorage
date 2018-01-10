@@ -62,4 +62,5 @@ public interface ICloudStorage extends Remote {
      */
     IFileProvider getStorageReference(String username) throws RemoteException;
 
+    void logout(Integer session) throws RemoteException;
 }

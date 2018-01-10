@@ -16,6 +16,8 @@ import java.util.logging.Logger;
 public class Storage extends UnicastRemoteObject implements IStorage, IFileProvider {
     private static final Logger LOGGER = Logger.getLogger(Storage.class.getName());
 
+    private int sessionid;
+
     private int id;
 
     private ICloudStorage cloudStorage;
@@ -290,5 +292,13 @@ public class Storage extends UnicastRemoteObject implements IStorage, IFileProvi
             LOGGER.severe("Storage: Cannot log out");
             LOGGER.severe("Storage: RemoteException: " + e.getMessage());
         }
+    }
+
+    public void setSessionid(int sessionid) {
+        this.sessionid = sessionid;
+    }
+
+    public int getSessionid() {
+        return sessionid;
     }
 }

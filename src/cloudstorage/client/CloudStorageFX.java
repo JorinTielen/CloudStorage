@@ -158,7 +158,7 @@ public class CloudStorageFX extends Application {
                 TextInputDialog dialog = new TextInputDialog("Share File");
                 dialog.setTitle("Share File");
                 dialog.setHeaderText("With who do you want to share?");
-                dialog.setContentText("Please0 enter their username:");
+                dialog.setContentText("Please enter their username:");
                 Optional<String> result = dialog.showAndWait();
 
                 result.ifPresent(name -> client.shareFile((File) selectedItem, result.get()));
@@ -320,10 +320,21 @@ public class CloudStorageFX extends Application {
 
         Button btnEditFile = new Button("Edit File");
         btnEditFile.setOnAction(event -> {
+            if (editMode) {
+                return;
+            }
+
             if (client.requestEditFile(file)) {
                 editMode = true;
                 text.setDisable(false);
                 lblEditMode.setText("Edit mode: on");
+            } else {
+                Alert alert = new Alert(Alert.AlertType.WARNING);
+                alert.setTitle("Cannot edit file");
+                alert.setHeaderText("You don't have the permission to edit.");
+                alert.setContentText("Someone else is editing this file!");
+
+                alert.showAndWait();
             }
         });
         hor.getChildren().add(btnEditFile);

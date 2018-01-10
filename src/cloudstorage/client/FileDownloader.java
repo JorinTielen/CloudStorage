@@ -14,7 +14,9 @@ public class FileDownloader {
 
         try (BufferedWriter writer =
                      new BufferedWriter(new FileWriter(path + filename))) {
-            writer.write(file.getText());
+            String text = file.getText();
+            text = text.replace("\n", System.lineSeparator());
+            writer.write(text);
         } catch (Exception e) {
             e.printStackTrace();
         }

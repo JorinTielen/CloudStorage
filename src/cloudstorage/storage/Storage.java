@@ -63,6 +63,10 @@ public class Storage extends UnicastRemoteObject implements IStorage, IFileProvi
         return root;
     }
 
+    public Folder clientPull() {
+        return repository.getRoot(owner);
+    }
+
     @Override
     public Folder getFiles() {
         return files;
@@ -206,7 +210,16 @@ public class Storage extends UnicastRemoteObject implements IStorage, IFileProvi
             //The remote storage is online, so let's go there.
             if (fileProvider != null) {
                 try {
-                    return fileProvider.saveFile(file, fileText, account);
+                    boolean success = fileProvider.saveFile(file, fileText, account);
+
+                    try {
+                        publisher.inform("root", null, root);
+                    } catch (RemoteException e) {
+                        LOGGER.severe("Storage: Cannot save file");
+                        LOGGER.severe("Storage: RemoteException: " + e.getMessage());
+                    }
+
+                    return success;
                 } catch (RemoteException e) {
                     LOGGER.severe("Storage: Cannot save file remotely");
                     LOGGER.severe("Storage: RemoteException: " + e.getMessage());
@@ -216,7 +229,7 @@ public class Storage extends UnicastRemoteObject implements IStorage, IFileProvi
 
         boolean success;
 
-        //The remoteStorage wasn't online, so we will edit it here.
+        //The remoteStorage wasn't online, so we will edit it here. (or we ARE the remote storage :) )
         if (realFile.editText(account, fileText)) {
              success = repository.saveFile(realFile);
         } else {

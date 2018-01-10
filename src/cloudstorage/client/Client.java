@@ -96,6 +96,10 @@ public class Client {
         ui.updateFileList();
     }
 
+    public void clientPull() {
+        localStorage.clientPull();
+    }
+
     private void connectToCloudStorage(String ip) {
         int port = 1099;
 
@@ -157,5 +161,9 @@ public class Client {
             LOGGER.severe("Client: RemoteException: " + e.getMessage());
         }
         localStorage.logout();
+    }
+
+    public Folder pullSelectedFolder() {
+        return localStorage.pullSelectedFolder();
     }
 }

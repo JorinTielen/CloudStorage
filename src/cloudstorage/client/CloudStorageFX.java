@@ -5,12 +5,9 @@ import cloudstorage.shared.Folder;
 import cloudstorage.shared.IViewable;
 import javafx.application.Application;
 import javafx.application.Platform;
-import javafx.event.ActionEvent;
-import javafx.event.EventHandler;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.Group;
-import javafx.scene.Node;
 import javafx.scene.Scene;
 import javafx.scene.control.*;
 import javafx.scene.input.MouseButton;
@@ -19,12 +16,8 @@ import javafx.scene.text.Font;
 import javafx.scene.text.FontWeight;
 import javafx.scene.text.Text;
 import javafx.stage.Stage;
-import javafx.stage.WindowEvent;
-import javafx.util.Pair;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
 
 public class CloudStorageFX extends Application {
 
@@ -36,7 +29,14 @@ public class CloudStorageFX extends Application {
 
     private final ListView<IViewable> files = new ListView<>();
 
+    private TextArea text;
     private boolean editMode = false;
+    private File openFile = null;
+
+    private boolean viewingFile = false;
+    private boolean pushedNotification = false;
+    private Timer timer = new Timer();
+
 
 
     @Override
@@ -57,9 +57,52 @@ public class CloudStorageFX extends Application {
             for (IViewable view : viewable) {
                 files.getItems().add(view);
             }
+
+            //Are you viewing a file?
+            if (viewingFile) {
+                if (filechanged(openFile, openFolder.getFiles())) {
+                    pushedNotification = true;
+                    Alert alert = new Alert(Alert.AlertType.INFORMATION);
+                    alert.setTitle("File has been changed");
+                    alert.setHeaderText("Someone else has edited the file.");
+                    alert.setContentText("Do you want to reload it?");
+                    alert.getButtonTypes().add(ButtonType.CANCEL);
+
+                    alert.showAndWait().ifPresent(response -> {
+                        if (response == ButtonType.OK) {
+                            File newFile = null;
+                            for (File f : openFolder.getFiles()) {
+                                if (f.getId() == openFile.getId()) {
+                                    newFile = f;
+                                }
+                            }
+
+                            if (newFile != null) {
+                                text.setText(newFile.getText());
+                                openFile = newFile;
+                            }
+                        }
+                    });
+                }
+            }
         });
     }
-    
+
+    private boolean filechanged(File openFile, List<File> files) {
+        for (File f : files) {
+            if (f.getId() == openFile.getId()) {
+                String text1 = "";
+                String text2 = "";
+                text1 += f.getText().replace("/r", "").replace("/n", "").replace(" ", "");
+                text2 += openFile.getText().replace("/r", "").replace("/n", "").replace(" ", "");
+
+                return (!text1.equals(text2));
+            }
+        }
+
+        return false;
+    }
+
     private void showLogInUI(Stage stage) {
         stage.setTitle("login");
 
@@ -296,6 +339,11 @@ public class CloudStorageFX extends Application {
     }
 
     private void showFileUI(File file) {
+        openFile = file;
+        viewingFile = true;
+
+        resetTimer();
+
         Stage stage = new Stage();
         Group root = new Group();
 
@@ -312,7 +360,7 @@ public class CloudStorageFX extends Application {
         lblEditMode.setAlignment(Pos.BOTTOM_RIGHT);
         hor.getChildren().add(lblEditMode);
 
-        TextArea text = new TextArea();
+        text = new TextArea();
         text.setMaxWidth(480);
         text.setText(file.getText());
         text.setDisable(true);
@@ -320,6 +368,7 @@ public class CloudStorageFX extends Application {
 
         Button btnEditFile = new Button("Edit File");
         btnEditFile.setOnAction(event -> {
+            viewingFile = false;
             if (editMode) {
                 return;
             }
@@ -328,7 +377,10 @@ public class CloudStorageFX extends Application {
                 editMode = true;
                 text.setDisable(false);
                 lblEditMode.setText("Edit mode: on");
+                stopTimer();
             } else {
+                viewingFile = true;
+
                 Alert alert = new Alert(Alert.AlertType.WARNING);
                 alert.setTitle("Cannot edit file");
                 alert.setHeaderText("You don't have the permission to edit.");
@@ -345,6 +397,14 @@ public class CloudStorageFX extends Application {
             if (client.saveFile(file, fileText)) {
                 editMode = false;
                 text.setDisable(true);
+                resetTimer();
+                try {
+                    Thread.sleep(200);
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
+                updateOpenFile();
+                viewingFile = true;
                 lblEditMode.setText("Edit mode: off");
             } else {
                 Alert alert = new Alert(Alert.AlertType.ERROR);
@@ -372,6 +432,8 @@ public class CloudStorageFX extends Application {
 
         Platform.setImplicitExit(false);
         stage.setOnCloseRequest(event -> {
+            timer.cancel();
+
             if (editMode) {
                 Alert alert = new Alert(Alert.AlertType.WARNING);
                 alert.setTitle("You have not saved yet.");
@@ -396,5 +458,35 @@ public class CloudStorageFX extends Application {
         stage.setTitle("File - " + file.getName());
         stage.setScene(scene);
         stage.show();
+    }
+
+    private void updateOpenFile() {
+        for (File f : client.pullSelectedFolder().getFiles()) {
+            if (openFile.getId() == f.getId()) {
+                openFile = f;
+                return;
+            }
+        }
+    }
+
+    private void stopTimer() {
+        timer.cancel();
+        timer = new Timer();
+    }
+
+    private void resetTimer() {
+        pushedNotification = false;
+        TimerTask timerTask = new TimerTask() {
+            @Override
+            public void run() {
+                if (!pushedNotification) {
+                    client.clientPull();
+                }
+            }
+        };
+
+        timer.cancel();
+        timer = new Timer();
+        timer.scheduleAtFixedRate(timerTask, 0, 2500);
     }
 }

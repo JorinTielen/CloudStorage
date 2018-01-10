@@ -114,4 +114,6 @@ public interface IStorage extends Remote {
     void setSessionid(int sessionid) throws RemoteException;
 
     int getSessionid() throws RemoteException;
+
+    Folder clientPull() throws RemoteException;
 }

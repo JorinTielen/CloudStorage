@@ -51,6 +51,19 @@ public class LocalStorage extends UnicastRemoteObject implements IRemoteProperty
         client.updateUI();
     }
 
+    public void clientPull() {
+        int selected_id = selectedFolder.getId();
+
+        try {
+            root = (Folder) remoteStorage.clientPull();
+        } catch (RemoteException e) {
+            e.printStackTrace();
+        }
+        selectedFolder = root.getFolder(selected_id);
+
+        client.updateUI();
+    }
+
     public Folder getRoot() {
         return root;
     }
@@ -143,5 +156,17 @@ public class LocalStorage extends UnicastRemoteObject implements IRemoteProperty
             LOGGER.severe("LocalStorage: RemoteException when trying to share file");
             LOGGER.severe("LocalStorage: RemoteException: " + e.getMessage());
         }
+    }
+
+    public Folder pullSelectedFolder() {
+        int selected_id = selectedFolder.getId();
+
+        try {
+            return (Folder) remoteStorage.clientPull().getFolder(selected_id);
+        } catch (RemoteException e) {
+            e.printStackTrace();
+        }
+
+        return null;
     }
 }

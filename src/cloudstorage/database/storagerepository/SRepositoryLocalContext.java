@@ -44,12 +44,12 @@ public class SRepositoryLocalContext implements ISRepositoryContext {
 
     @Override
     public boolean saveFile(File file) {
-        return false;
+        return true;
     }
 
     @Override
     public boolean shareFile(File file, String username) {
-        return false;
+        return true;
     }
 
     private boolean addFolder(Folder root, Folder parent, String name) {

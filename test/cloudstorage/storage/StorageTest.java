@@ -86,4 +86,66 @@ class StorageTest {
         assertEquals("jorin", owner.getName());
         assertEquals(1, owner.getId());
     }
+
+    @org.junit.jupiter.api.Test
+    void clientPull() {
+        Folder root = storage.clientPull();
+
+        assertEquals("root", root.getName());
+    }
+
+    @org.junit.jupiter.api.Test
+    void logout() {
+        storage.logout();
+    }
+
+    @org.junit.jupiter.api.Test
+    void setSessionid() {
+        storage.setSessionid(1);
+
+        assertEquals(1, storage.getSessionid());
+    }
+
+    @org.junit.jupiter.api.Test
+    void getSessionid() {
+        assertEquals(0, storage.getSessionid());
+    }
+
+    @org.junit.jupiter.api.Test
+    void saveFile() {
+        File f = new File(1, "f", 6, storage.getFiles(), storage.getOwner(), "ayy");
+
+        storage.getFiles().getFiles().add(f);
+        assertEquals("ayy", storage.getFiles().getFile("f").getText());
+
+        assertEquals(true, storage.lockFile(f, storage.getOwner()));
+
+        assertEquals(true, storage.saveFile(f, "ayy2", storage.getOwner()));
+
+        assertEquals("ayy2", storage.getFiles().getFile("f").getText());
+    }
+
+    @org.junit.jupiter.api.Test
+    void lockFile() {
+        File f = new File(1, "f", 6, storage.getFiles(), storage.getOwner(), "ayy");
+
+        storage.getFiles().getFiles().add(f);
+        assertEquals("ayy", storage.getFiles().getFile("f").getText());
+
+        assertEquals(true, storage.lockFile(f, storage.getOwner()));
+    }
+
+    @org.junit.jupiter.api.Test
+    void cancelEditFile() {
+        File f = new File(1, "f", 6, storage.getFiles(), storage.getOwner(), "ayy");
+
+        storage.getFiles().getFiles().add(f);
+        assertEquals("ayy", storage.getFiles().getFile("f").getText());
+
+        assertEquals(true, storage.lockFile(f, storage.getOwner()));
+
+        assertEquals(true, storage.cancelEditFile(f, storage.getOwner()));
+
+        assertEquals("ayy", storage.getFiles().getFile("f").getText());
+    }
 }

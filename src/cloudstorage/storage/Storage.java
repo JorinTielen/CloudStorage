@@ -227,7 +227,7 @@ public class Storage extends UnicastRemoteObject implements IStorage, IFileProvi
 
         boolean success;
 
-        //The remoteStorage wasn't online, so we will edit it here. (or we ARE the remote storage :) )
+        //The remoteStorage wasn't online, so we will edit it here. (or, we ARE the remote storage :) )
         if (realFile.editText(account, fileText)) {
              success = repository.saveFile(realFile);
         } else {

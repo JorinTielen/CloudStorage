@@ -142,7 +142,7 @@ public class CloudStorage extends UnicastRemoteObject implements ICloudStorage {
         for (IStorage s : storages) {
             try {
                 if (s.getOwner().getName().equals(username)) {
-                    return (Storage) s;
+                    return (IFileProvider) s;
                 }
             } catch (RemoteException e) {
                 LOGGER.severe("CloudStorage: Cannot get StorageReference");
